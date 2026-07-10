@@ -1,0 +1,19 @@
+{
+  "name": "FIT JARVIS — Sog‘lom hayot portali",
+  "short_name": "FIT JARVIS",
+  "description": "Fitness, ovqatlanish, uyqu, suv va progress nazorati uchun lokal portal.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#071321",
+  "theme_color": "#071321",
+  "lang": "uz",
+  "icons": [
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

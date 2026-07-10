@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FIT JARVIS — Sog‘lom hayot portali</title>
+<meta name="description" content="FIT JARVIS — fitness, ovqatlanish, uyqu, suv va progress nazorati uchun lokal MVP portal.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#071321">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">FJ</div><div><h1>FIT JARVIS</h1><small>Shaxsiy portal v3.0 MVP</small></div></div>
+    <nav class="nav">
+      <button class="active" data-page="dashboard">⌂ <span>Asosiy</span></button>
+      <button data-page="today">◉ <span>Bugungi reja</span></button>
+      <button data-page="tracking">▦ <span>30 kunlik tracking</span></button>
+      <button data-page="nutrition">◒ <span>Ovqatlanish</span></button>
+      <button data-page="training">◆ <span>Mashg‘ulot</span></button>
+      <button data-page="gymprogress">↗ <span>Gym progress</span></button>
+      <button data-page="measurements">◫ <span>Tana o‘lchovlari</span></button>
+      <button data-page="habits">✓ <span>Odatlar</span></button>
+      <button data-page="photos">▣ <span>Foto progress</span></button>
+      <button data-page="weekly">≡ <span>Haftalik hisobot</span></button>
+      <button data-page="statistics">▥ <span>Statistika</span></button>
+      <button data-page="settings">⚙ <span>Sozlamalar</span></button>
+    </nav>
+    <div class="mode"><b>● SOG‘LOM REJIM</b><p>Barqaror ozish, mushakni saqlash va tiklanishni nazorat qilish.</p></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="title"><h2 id="pageTitle">Salom! Men sizning fitness yordamchingizman.</h2>
+      <p id="goalSummary">86 kg dan 80 kg gacha — sport, ovqatlanish, uyqu, suv va odatlar nazorati.</p></div>
+      <div class="actions">
+        <button class="btn" id="themeToggle" type="button">☀ Oq rejim</button>
+        <button class="btn" id="exportJson">JSON backup</button>
+        <button class="btn" id="exportCsv">CSV eksport</button>
+        <label class="btn">Backup import<input type="file" id="importJson" accept=".json" hidden></label>
+        <button class="btn primary" id="saveAll">Saqlash</button>
+      </div>
+    </div>
+
+    <section id="dashboard" class="section active">
+      <div class="grid kpis">
+        <div class="card kpi"><span>Bo‘y</span><strong id="heightKpi">182 sm</strong></div>
+        <div class="card kpi"><span>Joriy vazn</span><strong id="currentWeight">86 kg</strong></div>
+        <div class="card kpi"><span>Maqsad</span><strong class="accent" id="goalWeightKpi">80 kg</strong></div>
+        <div class="card kpi"><span>O‘rtacha uyqu</span><strong id="avgSleep">—</strong></div>
+        <div class="card kpi"><span>O‘rtacha suv</span><strong id="avgWater">—</strong></div>
+        <div class="card kpi"><span>Joriy streak</span><strong id="streak">0 kun</strong></div>
+      </div>
+      <div class="grid dashboard-grid">
+        <div class="card">
+          <h3>30 kunlik progress</h3>
+          <canvas class="chart" id="weightChart"></canvas>
+        </div>
+        <div class="card today-plan">
+          <h3>Bugungi reja</h3>
+          <div id="todayPlan"></div>
+          <div class="macro-row" id="todayMacros"></div><div id="aiAdvice" class="summary-box" style="margin-top:12px"></div>
+        </div>
+        <div class="card">
+          <h3>Umumiy baho</h3>
+          <div class="score-ring" id="scoreRing"><div class="inner"><div><b id="overallScore">0%</b><br><span id="scoreLabel" class="status low">Past</span></div></div></div>
+          <div id="scoreBars"></div>
+        </div>
+      </div>
+      <div class="grid chart-grid" style="margin-top:14px">
+        <div class="card"><h3>Kunlik umumiy baho</h3><canvas class="chart" id="scoreChart"></canvas></div>
+        <div class="card"><h3>Uyqu va suv</h3><canvas class="chart" id="recoveryChart"></canvas></div>
+      </div>
+    </section>
+
+    <section id="today" class="section">
+      <div class="card">
+        <h3>Bugungi ma’lumotlarni kiriting</h3>
+        <div class="form-grid">
+          <div class="field"><label>Sana</label><input id="todayDate" type="date"></div>
+          <div class="field"><label>Sport bajarilishi (%)</label><input id="sportPct" type="number" min="0" max="100" value="0"></div>
+          <div class="field"><label>Ovqatlanishga amal (%)</label><input id="foodPct" type="number" min="0" max="100" value="0"></div>
+          <div class="field"><label>Ichilgan suv (L)</label><input id="water" type="number" min="0" step=".1"></div>
+          <div class="field"><label>Uyqu (soat)</label><input id="sleep" type="number" min="0" step=".1"></div>
+          <div class="field"><label>Vazn (kg)</label><input id="weight" type="number" min="40" step=".1"></div>
+          <div class="field"><label>Qadamlar</label><input id="steps" type="number" min="0"></div>
+          <div class="field"><label>Kreatin</label><select id="creatine"><option value="true">Ha, 5 g</option><option value="false">Yo‘q</option></select></div>
+          <div class="field"><label>Energiya (1–10)</label><input id="energy" type="number" min="1" max="10"></div>
+          <div class="field"><label>Kayfiyat (1–10)</label><input id="mood" type="number" min="1" max="10"></div>
+          <div class="field"><label>Iste’mol kkal</label><input id="actualKcal" type="number" min="0"></div>
+          <div class="field"><label>Iste’mol oqsil (g)</label><input id="actualProtein" type="number" min="0"></div>
+          <div class="field wide"><label>Ovqatlanish izohi</label><textarea id="foodNote"></textarea></div>
+          <div class="field wide"><label>Mashg‘ulot izohi</label><textarea id="trainingNote"></textarea></div>
+          <div class="field full"><label>Qo‘shimcha izoh</label><textarea id="extraNote"></textarea></div>
+        </div>
+        <div style="margin-top:14px"><button class="btn primary" id="saveToday">Bugungi ma’lumotni saqlash</button></div>
+      </div>
+    </section>
+
+    <section id="tracking" class="section">
+      <div class="card"><h3>30 kunlik tracking</h3><p class="muted">Foizlar va qiymatlarni jadvalning o‘zida kiriting. “Reja” ustunidagi mashg‘ulotni qo‘lda o‘zgartirish va saqlash mumkin. Umumiy baho avtomatik hisoblanadi.</p>
+        <div class="table-wrap"><table id="trackingTable">
+          <thead><tr>
+            <th>#</th><th>Sana</th><th>Kun</th><th>Reja</th><th>Sport %</th><th>Ovqat %</th>
+            <th>Suv L</th><th>Uyqu soat</th><th>Vazn kg</th><th>Qadam</th><th>Kreatin</th>
+            <th>Umumiy %</th><th>Baho</th><th>Qo‘shimcha izoh</th>
+          </tr></thead><tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <section id="nutrition" class="section">
+      <div class="grid nutrition-cards" id="nutritionCards"></div>
+      <div class="card" style="margin-top:14px">
+        <h3>Ovqatlanish qoidasi</h3>
+        <div class="note-box">Har ovqatda: oqsil manbai + sabzavot + rejalashtirilgan uglevod. Yog‘ni o‘lchab ishlating. Qovurish uchun refined/light olive oil yoki high-oleic kungaboqar yog‘i ma’qul.</div>
+      </div>
+    </section>
+
+    <section id="training" class="section">
+      <div class="grid schedule" id="scheduleCards"></div>
+      <div class="grid chart-grid" style="margin-top:14px">
+        <div class="card"><h3>Shanba — Oyoq kuni</h3><div id="legWorkout"></div></div>
+        <div class="card"><h3>Yakshanba — Upper body</h3><div id="upperWorkout"></div></div>
+      </div>
+    </section>
+
+
+    <section id="gymprogress" class="section">
+      <div class="grid chart-grid">
+        <div class="card"><h3>Gym natijasini qo‘shish</h3><div class="form-grid">
+          <div class="field"><label>Sana</label><input id="gymDate" type="date"></div><div class="field"><label>Mashq</label><input id="gymExercise" placeholder="Leg Press"></div>
+          <div class="field"><label>Vazn (kg)</label><input id="gymWeight" type="number" step=".5"></div><div class="field"><label>Set</label><input id="gymSets" type="number"></div>
+          <div class="field"><label>Takror</label><input id="gymReps" type="number"></div><div class="field"><label>RPE (1–10)</label><input id="gymRpe" type="number" min="1" max="10"></div>
+          <div class="field wide"><label>Izoh</label><input id="gymNote"></div></div><button class="btn primary" id="addGym" style="margin-top:12px">Natijani saqlash</button></div>
+        <div class="card"><h3>Shaxsiy rekordlar</h3><div id="prList"></div></div>
+      </div><div class="card" style="margin-top:14px"><h3>Gym tarixi</h3><div class="table-wrap"><table id="gymTable"><thead><tr><th>Sana</th><th>Mashq</th><th>Vazn</th><th>Set</th><th>Takror</th><th>RPE</th><th>Hajm</th><th>Izoh</th><th></th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="measurements" class="section"><div class="grid chart-grid"><div class="card"><h3>Tana o‘lchovini qo‘shish</h3><div class="form-grid">
+      <div class="field"><label>Sana</label><input id="measureDate" type="date"></div><div class="field"><label>Vazn kg</label><input id="mWeight" type="number" step=".1"></div>
+      <div class="field"><label>Bel sm</label><input id="waist" type="number" step=".1"></div><div class="field"><label>Ko‘krak sm</label><input id="chest" type="number" step=".1"></div>
+      <div class="field"><label>Qo‘l sm</label><input id="arm" type="number" step=".1"></div><div class="field"><label>Son sm</label><input id="thigh" type="number" step=".1"></div>
+      <div class="field"><label>Tana yog‘i %</label><input id="bodyFat" type="number" step=".1"></div></div><button class="btn primary" id="addMeasure" style="margin-top:12px">O‘lchovni saqlash</button></div>
+      <div class="card"><h3>Bel progressi</h3><canvas class="chart" id="measureChart"></canvas></div></div>
+      <div class="card" style="margin-top:14px"><div class="table-wrap"><table id="measureTable"><thead><tr><th>Sana</th><th>Vazn</th><th>Bel</th><th>Ko‘krak</th><th>Qo‘l</th><th>Son</th><th>Yog‘ %</th><th></th></tr></thead><tbody></tbody></table></div></div></section>
+
+    <section id="photos" class="section"><div class="card"><h3>Foto progress</h3><p class="muted">Har 2 haftada old, yon va orqa surat kiriting.</p><div class="form-grid"><div class="field"><label>Sana</label><input id="photoDate" type="date"></div><div class="field"><label>Holat</label><select id="photoType"><option>Old</option><option>Yon</option><option>Orqa</option></select></div><div class="field wide"><label>Rasm</label><input id="photoFile" type="file" accept="image/*"></div></div><button class="btn primary" id="addPhoto" style="margin-top:12px">Foto saqlash</button></div><div class="photo-grid" id="photoGrid" style="margin-top:14px"></div></section>
+
+    <section id="weekly" class="section"><div class="card"><h3>Haftalik avtomatik hisobot</h3><div class="inline"><label>Hafta boshi: <input id="weekStart" type="date" class="btn"></label><button class="btn primary" id="makeWeekly">Hisobot yaratish</button></div><div id="weeklyReport" style="margin-top:14px"></div></div></section>
+
+    <section id="habits" class="section">
+      <div class="grid chart-grid"><div class="card"><h3>Bugungi odatlar</h3><div class="grid habits" id="habitList"></div></div><div class="card"><h3>30 kunlik odatlar heatmap</h3><div id="habitHeatmaps"></div></div></div>
+    </section>
+
+    <section id="statistics" class="section">
+      <div class="grid chart-grid">
+        <div class="card"><h3>Sport va ovqatlanish intizomi</h3><canvas class="chart" id="disciplineChart"></canvas></div>
+        <div class="card"><h3>Kaloriya va oqsil</h3><canvas class="chart" id="macroChart"></canvas></div>
+      </div>
+    </section>
+
+    <section id="settings" class="section">
+      <div class="card">
+        <h3>Maqsad va baholash sozlamalari</h3>
+        <div class="form-grid">
+          <div class="field"><label>Maqsad vazn (kg)</label><input id="goalWeight" type="number" value="80"></div>
+          <div class="field"><label>Suv maqsadi (L)</label><input id="waterGoal" type="number" step=".1" value="3"></div>
+          <div class="field"><label>Uyqu maqsadi (soat)</label><input id="sleepGoal" type="number" step=".1" value="7"></div>
+          <div class="field"><label>Qadam maqsadi</label><input id="stepsGoal" type="number" value="8000"></div>
+          <div class="field"><label>Sport vazni (%)</label><input id="sportWeight" type="number" value="40"></div>
+          <div class="field"><label>Ovqat vazni (%)</label><input id="foodWeight" type="number" value="35"></div>
+          <div class="field"><label>Uyqu vazni (%)</label><input id="sleepWeight" type="number" value="15"></div>
+          <div class="field"><label>Suv vazni (%)</label><input id="waterWeight" type="number" value="10"></div>
+        </div>
+        <button class="btn primary" id="saveSettings" style="margin-top:14px">Sozlamalarni saqlash</button>
+      </div>
+    </section>
+    <div class="footer">FIT JARVIS — ma’lumotlar shu brauzerda saqlanadi. Tibbiy tashxis vositasi emas.</div>
+  </main>
+</div>
+
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
