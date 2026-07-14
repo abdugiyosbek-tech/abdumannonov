@@ -1,19 +1,11 @@
 {
-  "name": "FIT JARVIS — Sog‘lom hayot portali",
+  "name": "FIT JARVIS v4 Cloud Sync",
   "short_name": "FIT JARVIS",
-  "description": "Fitness, ovqatlanish, uyqu, suv va progress nazorati uchun lokal portal.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#071321",
+  "background_color": "#050d17",
   "theme_color": "#071321",
-  "lang": "uz",
-  "icons": [
-    {
-      "src": "assets/icons/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+  "description": "Fitness va progress portali — telefon va kompyuter o‘rtasida Supabase bulut sinxronizatsiyasi.",
+  "icons": []
 }

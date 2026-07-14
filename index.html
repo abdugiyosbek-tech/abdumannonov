@@ -3,17 +3,112 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FIT JARVIS — Sog‘lom hayot portali</title>
-<meta name="description" content="FIT JARVIS — fitness, ovqatlanish, uyqu, suv va progress nazorati uchun lokal MVP portal.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>FIT JARVIS v4 — Cloud Sync</title>
+<meta name="description" content="FIT JARVIS v4 — fitness, ovqatlanish va progress uchun telefon-kompyuter bulut sinxronizatsiyali portal.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' https://bgdcapcopsrvgsgwewlg.supabase.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#071321">
-<link rel="stylesheet" href="assets/css/styles.css">
-<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<style>
+:root{
+  --bg:#06101c; --panel:#0c1b2b; --panel2:#10253a; --line:#183d5c;
+  --cyan:#28d7ff; --blue:#2994ff; --green:#34e69a; --purple:#b077ff;
+  --orange:#ffb34d; --red:#ff6b75; --text:#edf8ff; --muted:#91abc0;
+  --shadow:0 10px 35px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 75% -10%,#12335a 0,#071321 35%,#040b13 75%);
+color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;min-height:100vh}
+button,input,select,textarea{font:inherit}
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;padding:22px 16px;background:rgba(4,13,24,.95);
+border-right:1px solid var(--line);box-shadow:8px 0 30px rgba(0,0,0,.22)}
+.brand{display:flex;align-items:center;gap:12px;padding:8px 8px 22px}
+.logo{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--cyan);
+box-shadow:0 0 20px rgba(40,215,255,.35);font-weight:800;color:var(--cyan)}
+.brand h1{font-size:18px;margin:0}.brand small{color:var(--muted)}
+.nav button{display:flex;align-items:center;width:100%;gap:10px;border:0;background:transparent;color:#b9d0e1;
+padding:12px;border-radius:12px;margin:5px 0;cursor:pointer;text-align:left}
+.nav button:hover,.nav button.active{background:linear-gradient(90deg,rgba(40,215,255,.18),rgba(40,215,255,.03));
+color:white;border-left:3px solid var(--cyan)}
+.mode{position:absolute;left:16px;right:16px;bottom:18px;padding:15px;border:1px solid rgba(52,230,154,.45);
+background:rgba(52,230,154,.08);border-radius:14px}
+.mode b{color:var(--green)}.mode p{font-size:12px;color:#a8c9bd;margin:8px 0 0}
+.main{padding:24px;overflow:hidden}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:18px}
+.title h2{font-size:28px;margin:0;color:var(--cyan)}.title p{margin:7px 0;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.btn{border:1px solid var(--line);background:#0c2034;color:white;padding:10px 13px;border-radius:10px;cursor:pointer}
+.btn:hover{border-color:var(--cyan)}.btn.primary{background:linear-gradient(135deg,#167db6,#19b8dd);border:0}.btn.danger{border-color:rgba(255,107,117,.5);color:#ffd7da;background:rgba(255,107,117,.08)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.section{display:none}.section.active{display:block}
+.grid{display:grid;gap:14px}.kpis{grid-template-columns:repeat(6,minmax(120px,1fr))}
+.card{background:linear-gradient(145deg,rgba(16,37,58,.95),rgba(8,22,36,.96));border:1px solid var(--line);
+border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.kpi span{color:var(--muted);font-size:12px}.kpi strong{display:block;font-size:23px;margin-top:7px}
+.kpi .accent{color:var(--cyan)}
+.dashboard-grid{grid-template-columns:1.2fr 1fr .75fr;margin-top:14px}
+.score-ring{width:160px;height:160px;border-radius:50%;display:grid;place-items:center;margin:10px auto;
+background:conic-gradient(var(--green) 0deg,rgba(255,255,255,.08) 0deg)}
+.score-ring .inner{width:126px;height:126px;border-radius:50%;background:#0b1b2c;display:grid;place-items:center;text-align:center}
+.score-ring b{font-size:34px}.status{font-weight:700}.excellent{color:var(--green)}.good{color:var(--cyan)}
+.ok{color:var(--orange)}.average{color:#ff9366}.low{color:var(--red)}
+.progress-row{margin:12px 0}.progress-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.bar{height:9px;background:#172c3f;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:var(--cyan)}
+.today-plan h3,.card h3{margin:0 0 12px}.plan-chip{padding:12px;border-radius:12px;background:rgba(40,215,255,.07);
+border:1px solid rgba(40,215,255,.25);margin:8px 0}
+.macro-row{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.macro{padding:10px;border-radius:10px;text-align:center;background:#0a1929}
+.macro b{display:block;font-size:20px;color:var(--cyan)}.macro small{color:var(--muted)}
+.chart{width:100%;height:260px;background:#091827;border-radius:12px}
+.form-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px}
+.field label{display:block;color:var(--muted);font-size:12px;margin:0 0 6px}
+.field input,.field select,.field textarea{width:100%;background:#081725;color:white;border:1px solid #24465f;
+border-radius:10px;padding:10px;outline:none}.field input:focus,.field textarea:focus{border-color:var(--cyan)}
+.field textarea{min-height:88px;resize:vertical}.wide{grid-column:span 2}.full{grid-column:1/-1}
+.table-wrap{overflow:auto;border-radius:14px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:1100px;background:#091725}
+th,td{padding:10px;border-bottom:1px solid #19354c;text-align:left;font-size:12px;white-space:nowrap}
+th{position:sticky;top:0;background:#10253a;color:var(--cyan);z-index:1}
+td input,td select{width:90px;background:#081522;color:white;border:1px solid #25435b;border-radius:7px;padding:6px}
+td .note{width:220px}.badge{display:inline-block;padding:5px 9px;border-radius:99px;background:rgba(40,215,255,.12);color:var(--cyan)}
+.schedule{grid-template-columns:repeat(7,1fr)}.day{min-height:130px}.day b{color:var(--cyan)}.day p{font-size:13px;color:#bad0df}
+.nutrition-cards{grid-template-columns:repeat(4,1fr)}.nutrition-card{border-top:3px solid var(--cyan)}
+.nutrition-card:nth-child(2){border-top-color:var(--green)}.nutrition-card:nth-child(3){border-top-color:var(--purple)}
+.nutrition-card:nth-child(4){border-top-color:var(--orange)}
+.habits{grid-template-columns:repeat(2,1fr)}.habit-item{display:flex;align-items:center;justify-content:space-between;padding:12px;
+border-bottom:1px solid #19354c}.habit-item input{width:20px;height:20px}
+.chart-grid{grid-template-columns:1fr 1fr}.muted{color:var(--muted)}.note-box{padding:12px;border-left:3px solid var(--orange);
+background:rgba(255,179,77,.08);border-radius:8px}
+.footer{margin-top:18px;text-align:center;color:#5e829b;font-size:12px}
+@media(max-width:1050px){.app{grid-template-columns:80px 1fr}.brand div,.nav button span,.mode{display:none}.sidebar{padding:15px 10px}.nav button{justify-content:center}
+.kpis{grid-template-columns:repeat(3,1fr)}.dashboard-grid,.chart-grid{grid-template-columns:1fr}.nutrition-cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.app{display:block}.sidebar{position:sticky;height:auto;z-index:5;display:flex;padding:8px;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}
+.brand{padding:0 8px}.logo{width:38px;height:38px}.nav{display:flex}.nav button{width:auto}.main{padding:14px}.topbar{display:block}.actions{justify-content:flex-start}
+.kpis,.form-grid,.nutrition-cards,.habits,.schedule{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}}
+
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.photo-card img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:#071421}.heatmap{display:grid;grid-template-columns:repeat(30,1fr);gap:4px}.heat{aspect-ratio:1;border-radius:4px;background:#173044}.heat.on{background:#36e69b}.summary-box{padding:13px;border-left:3px solid var(--green);background:rgba(52,230,154,.08);border-radius:9px}.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+
+/* FIT JARVIS v4 — Cloud/Auth */
+.sync-pill{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:rgba(12,32,52,.9);color:var(--muted);font-size:13px;white-space:nowrap}
+.sync-pill::before{content:"";width:8px;height:8px;border-radius:50%;background:#91abc0;box-shadow:0 0 0 3px rgba(145,171,192,.12)}
+.sync-pill.ok{color:#a9f4d2;border-color:rgba(52,230,154,.45)}.sync-pill.ok::before{background:var(--green)}
+.sync-pill.busy{color:#b9efff;border-color:rgba(40,215,255,.45)}.sync-pill.busy::before{background:var(--cyan);animation:pulse 1s infinite alternate}
+.sync-pill.warn{color:#ffd499;border-color:rgba(255,179,77,.5)}.sync-pill.warn::before{background:var(--orange)}
+.sync-pill.error{color:#ffb1b7;border-color:rgba(255,107,117,.5)}.sync-pill.error::before{background:var(--red)}
+@keyframes pulse{to{transform:scale(1.45);opacity:.55}}
+.auth-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:rgba(1,7,13,.82);backdrop-filter:blur(8px)}
+.auth-modal.hidden{display:none}.auth-card{width:min(460px,100%);background:linear-gradient(145deg,#10253a,#071625);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 25px 80px rgba(0,0,0,.55)}
+.auth-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}.auth-head h3{margin:0;color:var(--cyan);font-size:22px}.auth-head p{margin:6px 0 0;color:var(--muted);font-size:13px}.icon-btn{border:1px solid var(--line);background:#0b1d2e;color:white;width:36px;height:36px;border-radius:10px;cursor:pointer}
+.auth-fields{display:grid;gap:11px}.auth-fields label{display:grid;gap:6px;color:#bcd2e2;font-size:13px}.auth-fields input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#071625;color:white;outline:none}.auth-fields input:focus{border-color:var(--cyan)}
+.auth-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.auth-tools{display:grid;gap:9px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.auth-message{min-height:20px;margin-top:12px;color:var(--muted);font-size:13px;line-height:1.45}.auth-message.error{color:#ffafb5}.auth-message.success{color:#9cf0ca}
+.account-box{padding:12px;border:1px solid rgba(52,230,154,.35);border-radius:12px;background:rgba(52,230,154,.07)}.account-box b{display:block;color:var(--green);overflow-wrap:anywhere}.small-note{font-size:12px;color:var(--muted);line-height:1.45}
+.cloud-card{margin-top:14px}.cloud-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}
+@media(max-width:720px){.sync-pill{width:100%;justify-content:center}.auth-buttons,.cloud-grid{grid-template-columns:1fr}.auth-card{padding:17px}.mode{display:none}.photo-grid{grid-template-columns:1fr 1fr}}
+
+</style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="logo">FJ</div><div><h1>FIT JARVIS</h1><small>Shaxsiy portal v3.0 MVP</small></div></div>
+    <div class="brand"><div class="logo">FJ</div><div><h1>FIT JARVIS</h1><small>Shaxsiy portal v4.0 Cloud</small></div></div>
     <nav class="nav">
       <button class="active" data-page="dashboard">⌂ <span>Asosiy</span></button>
       <button data-page="today">◉ <span>Bugungi reja</span></button>
@@ -34,9 +129,10 @@
   <main class="main">
     <div class="topbar">
       <div class="title"><h2 id="pageTitle">Salom! Men sizning fitness yordamchingizman.</h2>
-      <p id="goalSummary">86 kg dan 80 kg gacha — sport, ovqatlanish, uyqu, suv va odatlar nazorati.</p></div>
+      <p>86 kg dan 80 kg gacha — sport, ovqatlanish, uyqu, suv va odatlar nazorati.</p></div>
       <div class="actions">
-        <button class="btn" id="themeToggle" type="button">☀ Oq rejim</button>
+        <span class="sync-pill" id="syncStatus" title="Bulut sinxronizatsiyasi holati">Faqat lokal</span>
+        <button class="btn" id="accountBtn" type="button">Akkauntga kirish</button>
         <button class="btn" id="exportJson">JSON backup</button>
         <button class="btn" id="exportCsv">CSV eksport</button>
         <label class="btn">Backup import<input type="file" id="importJson" accept=".json" hidden></label>
@@ -46,9 +142,9 @@
 
     <section id="dashboard" class="section active">
       <div class="grid kpis">
-        <div class="card kpi"><span>Bo‘y</span><strong id="heightKpi">182 sm</strong></div>
+        <div class="card kpi"><span>Bo‘y</span><strong>182 sm</strong></div>
         <div class="card kpi"><span>Joriy vazn</span><strong id="currentWeight">86 kg</strong></div>
-        <div class="card kpi"><span>Maqsad</span><strong class="accent" id="goalWeightKpi">80 kg</strong></div>
+        <div class="card kpi"><span>Maqsad</span><strong class="accent">80 kg</strong></div>
         <div class="card kpi"><span>O‘rtacha uyqu</span><strong id="avgSleep">—</strong></div>
         <div class="card kpi"><span>O‘rtacha suv</span><strong id="avgWater">—</strong></div>
         <div class="card kpi"><span>Joriy streak</span><strong id="streak">0 kun</strong></div>
@@ -100,7 +196,7 @@
     </section>
 
     <section id="tracking" class="section">
-      <div class="card"><h3>30 kunlik tracking</h3><p class="muted">Foizlar va qiymatlarni jadvalning o‘zida kiriting. “Reja” ustunidagi mashg‘ulotni qo‘lda o‘zgartirish va saqlash mumkin. Umumiy baho avtomatik hisoblanadi.</p>
+      <div class="card"><h3>30 kunlik tracking</h3><p class="muted">Foizlar va qiymatlarni jadvalning o‘zida kiriting. Umumiy baho avtomatik hisoblanadi.</p>
         <div class="table-wrap"><table id="trackingTable">
           <thead><tr>
             <th>#</th><th>Sana</th><th>Kun</th><th>Reja</th><th>Sport %</th><th>Ovqat %</th>
@@ -177,11 +273,434 @@
         </div>
         <button class="btn primary" id="saveSettings" style="margin-top:14px">Sozlamalarni saqlash</button>
       </div>
+      <div class="card cloud-card">
+        <h3>Bulut sinxronizatsiyasi</h3>
+        <p class="muted" id="cloudAccountText">Akkauntga kirilmagan. Ma’lumotlar faqat shu qurilmada saqlanadi.</p>
+        <div class="cloud-grid">
+          <button class="btn" id="downloadCloud" type="button">Bulutdan yuklash</button>
+          <button class="btn" id="uploadCloud" type="button">Bulutga yuborish</button>
+          <button class="btn danger" id="logoutCloud" type="button">Akkauntdan chiqish</button>
+        </div>
+        <p class="small-note">Avtomatik sinxronlash akkauntga kirilganda ishlaydi. JSON backup tugmasi qo‘shimcha xavfsizlik uchun saqlab qolingan.</p>
+      </div>
     </section>
-    <div class="footer">FIT JARVIS — ma’lumotlar shu brauzerda saqlanadi. Tibbiy tashxis vositasi emas.</div>
+    <div class="footer">FIT JARVIS v4 — ma’lumotlar lokal va akkauntga kirilganda Supabase bulutida saqlanadi. Tibbiy tashxis vositasi emas.</div>
   </main>
 </div>
 
-<script type="module" src="assets/js/app.js"></script>
+
+<div class="auth-modal hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="auth-card">
+    <div class="auth-head">
+      <div><h3 id="authTitle">FIT JARVIS akkaunti</h3><p>Telefon va kompyuterdagi ma’lumotlarni birlashtirish.</p></div>
+      <button class="icon-btn" id="closeAuth" type="button" aria-label="Yopish">×</button>
+    </div>
+    <div id="signedOutPanel">
+      <div class="auth-fields">
+        <label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="email@example.com"></label>
+        <label>Parol<input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Kamida 6 ta belgi"></label>
+      </div>
+      <div class="auth-buttons">
+        <button class="btn primary" id="signInBtn" type="button">Kirish</button>
+        <button class="btn" id="signUpBtn" type="button">Ro‘yxatdan o‘tish</button>
+      </div>
+      <p class="small-note">Ro‘yxatdan o‘tgach Supabase tasdiqlash xati yuborishi mumkin. Xatdagi havolani bosing, so‘ng portalga qayting.</p>
+    </div>
+    <div id="signedInPanel" hidden>
+      <div class="account-box"><span>Akkaunt</span><b id="accountEmail">—</b></div>
+      <div class="auth-tools">
+        <button class="btn primary" id="syncNowBtn" type="button">Hozir sinxronlash</button>
+        <button class="btn" id="forceDownloadBtn" type="button">Bulutdan majburan yuklash</button>
+        <button class="btn" id="forceUploadBtn" type="button">Qurilmadan bulutga yuborish</button>
+        <button class="btn danger" id="modalLogoutBtn" type="button">Chiqish</button>
+      </div>
+    </div>
+    <div class="auth-message" id="authMessage" aria-live="polite"></div>
+  </div>
+</div>
+
+<script>
+
+const SUPABASE_URL="https://bgdcapcopsrvgsgwewlg.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_Aie4TOuElpvrtFu048OCwA_95Xqansl";
+const CLOUD_SESSION_KEY="fj_supabase_session";
+const CLOUD_LAST_SYNC_KEY="fj_cloud_last_sync";
+const LOCAL_UPDATED_KEY="fj_local_updated_at";
+const CLOUD_PENDING_KEY="fj_cloud_pending";
+const CANONICAL_PORTAL_URL="https://abdugiyosbek-tech.github.io/abdumannonov/";
+let cloudSession=null;
+let cloudSyncTimer=null;
+let cloudBusy=false;
+let cloudBooting=true;
+
+function safeParseJSON(raw,fallback=null){try{return raw?JSON.parse(raw):fallback}catch(_){return fallback}}
+function jwtPayload(token){try{const part=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(decodeURIComponent(escape(atob(part))))}catch(_){return {}}}
+function normalizeSession(raw){
+  if(!raw?.access_token)return null;
+  const payload=jwtPayload(raw.access_token);
+  const expiresAt=Number(raw.expires_at||payload.exp||0);
+  return {...raw,expires_at:expiresAt,user:raw.user||{id:payload.sub,email:payload.email}};
+}
+function loadCloudSession(){cloudSession=normalizeSession(safeParseJSON(localStorage.getItem(CLOUD_SESSION_KEY)));return cloudSession}
+function storeCloudSession(session){cloudSession=normalizeSession(session);if(cloudSession)localStorage.setItem(CLOUD_SESSION_KEY,JSON.stringify(cloudSession));else localStorage.removeItem(CLOUD_SESSION_KEY);updateCloudUI()}
+function setSyncStatus(text,kind=""){const el=document.getElementById("syncStatus");if(!el)return;el.textContent=text;el.className=`sync-pill ${kind}`.trim()}
+function setAuthMessage(text,kind=""){const el=document.getElementById("authMessage");if(!el)return;el.textContent=text||"";el.className=`auth-message ${kind}`.trim()}
+function sessionUser(){if(!cloudSession)return null;const p=jwtPayload(cloudSession.access_token);return cloudSession.user||{id:p.sub,email:p.email}}
+function updateCloudUI(){
+  const user=sessionUser(),logged=Boolean(user?.id);
+  const accountBtn=document.getElementById("accountBtn");
+  if(accountBtn)accountBtn.textContent=logged?(user.email||"Akkaunt"):"Akkauntga kirish";
+  const out=document.getElementById("signedOutPanel"),inside=document.getElementById("signedInPanel");
+  if(out)out.hidden=logged;if(inside)inside.hidden=!logged;
+  const email=document.getElementById("accountEmail");if(email)email.textContent=user?.email||"Akkaunt";
+  const cloudText=document.getElementById("cloudAccountText");if(cloudText)cloudText.textContent=logged?`${user.email||"Akkaunt"} — avtomatik sinxronlash faol.`:"Akkauntga kirilmagan. Ma’lumotlar faqat shu qurilmada saqlanadi.";
+  ["downloadCloud","uploadCloud","logoutCloud"].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!logged});
+  if(!logged)setSyncStatus(navigator.onLine?"Faqat lokal":"Internet yo‘q","warn");
+}
+function openAuth(){document.getElementById("authModal")?.classList.remove("hidden");setAuthMessage("");updateCloudUI()}
+function closeAuth(){document.getElementById("authModal")?.classList.add("hidden")}
+function authHeaders(token=null){const h={"apikey":SUPABASE_PUBLISHABLE_KEY,"Content-Type":"application/json"};if(token)h.Authorization=`Bearer ${token}`;return h}
+async function readJsonResponse(response){const text=await response.text();let data=null;try{data=text?JSON.parse(text):null}catch(_){data=text}if(!response.ok){const msg=data?.msg||data?.message||data?.error_description||data?.error||`HTTP ${response.status}`;throw new Error(msg)}return data}
+async function authFetch(path,options={}){const response=await fetch(`${SUPABASE_URL}${path}`,{...options,headers:{...authHeaders(options.token),...(options.headers||{})}});return readJsonResponse(response)}
+async function signUpCloud(email,password){return authFetch(`/auth/v1/signup?redirect_to=${encodeURIComponent(CANONICAL_PORTAL_URL)}`,{method:"POST",body:JSON.stringify({email,password})})}
+async function signInCloud(email,password){return authFetch("/auth/v1/token?grant_type=password",{method:"POST",body:JSON.stringify({email,password})})}
+async function refreshCloudSession(){
+  if(!cloudSession?.refresh_token)throw new Error("Sessiya tugagan. Qayta kiring.");
+  const next=await authFetch("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:cloudSession.refresh_token})});
+  storeCloudSession(next);return cloudSession;
+}
+async function ensureValidSession(){
+  if(!cloudSession)throw new Error("Avval akkauntga kiring.");
+  const now=Math.floor(Date.now()/1000);
+  if(Number(cloudSession.expires_at||0)<now+60)await refreshCloudSession();
+  return cloudSession;
+}
+async function logoutCloud(){
+  try{if(cloudSession?.access_token)await fetch(`${SUPABASE_URL}/auth/v1/logout`,{method:"POST",headers:authHeaders(cloudSession.access_token)})}catch(_){}
+  storeCloudSession(null);localStorage.removeItem(CLOUD_PENDING_KEY);setAuthMessage("Akkauntdan chiqildi.","success");closeAuth();
+}
+function extractRedirectSession(){
+  const hash=new URLSearchParams(location.hash.replace(/^#/,""));
+  if(hash.get("error_description")){setTimeout(()=>{openAuth();setAuthMessage(hash.get("error_description"),"error")},0);history.replaceState({},document.title,location.pathname+location.search);return}
+  const access=hash.get("access_token");
+  if(access){const session={access_token:access,refresh_token:hash.get("refresh_token"),expires_in:Number(hash.get("expires_in")||3600),expires_at:Math.floor(Date.now()/1000)+Number(hash.get("expires_in")||3600),token_type:hash.get("token_type")||"bearer"};storeCloudSession(session);history.replaceState({},document.title,location.pathname+location.search);setTimeout(()=>{openAuth();setAuthMessage("Email tasdiqlandi. Bulut sinxronizatsiyasi tayyor.","success")},0)}
+}
+function hasMeaningfulLocalData(){
+  const meaningfulRecord=Object.values(records||{}).some(r=>Number(r.sport)||Number(r.food)||Number(r.water)||Number(r.sleep)||Number(r.weight)||Number(r.steps)||Number(r.actualKcal)||Number(r.actualProtein)||(r.foodNote||r.trainingNote||r.extraNote||"").trim());
+  return meaningfulRecord||Object.values(habitData||{}).some(v=>Array.isArray(v)?v.some(Boolean):Object.values(v||{}).some(Boolean))||gymData.length>0||measureData.length>0||photoData.length>0;
+}
+function cloudPayload(){return {version:4,settings,records,habitData,gymData,measureData,photoData}}
+async function cloudRequest(path,options={}){
+  await ensureValidSession();
+  let response=await fetch(`${SUPABASE_URL}${path}`,{...options,headers:{...authHeaders(cloudSession.access_token),...(options.headers||{})}});
+  if(response.status===401&&cloudSession?.refresh_token){await refreshCloudSession();response=await fetch(`${SUPABASE_URL}${path}`,{...options,headers:{...authHeaders(cloudSession.access_token),...(options.headers||{})}})}
+  return readJsonResponse(response);
+}
+async function fetchCloudRow(){
+  const user=sessionUser();if(!user?.id)throw new Error("Foydalanuvchi aniqlanmadi.");
+  const rows=await cloudRequest(`/rest/v1/user_state?select=data,updated_at&user_id=eq.${encodeURIComponent(user.id)}&limit=1`,{method:"GET",headers:{Accept:"application/json"}});
+  return Array.isArray(rows)?rows[0]||null:null;
+}
+async function uploadStateToCloud({silent=false}={}){
+  if(!cloudSession||cloudBusy)return false;if(!navigator.onLine){localStorage.setItem(CLOUD_PENDING_KEY,"1");setSyncStatus("Internet yo‘q — lokal saqlandi","warn");return false}
+  cloudBusy=true;if(!silent)setSyncStatus("Bulutga saqlanmoqda…","busy");
+  try{
+    const user=sessionUser();if(!user?.id)throw new Error("Foydalanuvchi aniqlanmadi.");
+    const updatedAt=new Date().toISOString();
+    const rows=await cloudRequest("/rest/v1/user_state?on_conflict=user_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=representation"},body:JSON.stringify({user_id:user.id,data:cloudPayload(),updated_at:updatedAt})});
+    const savedAt=Array.isArray(rows)&&rows[0]?.updated_at?rows[0].updated_at:updatedAt;
+    localStorage.setItem(CLOUD_LAST_SYNC_KEY,savedAt);localStorage.setItem(LOCAL_UPDATED_KEY,savedAt);localStorage.removeItem(CLOUD_PENDING_KEY);setSyncStatus("Bulut bilan sinxronlandi","ok");return true;
+  }catch(error){localStorage.setItem(CLOUD_PENDING_KEY,"1");setSyncStatus("Sinxronlash xatosi","error");if(!silent)setAuthMessage(error.message,"error");return false}finally{cloudBusy=false}
+}
+function scheduleCloudSync(){if(cloudBooting||!cloudSession)return;clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>uploadStateToCloud({silent:true}),1200)}
+async function applyCloudData(row){
+  const d=row?.data;if(!d||typeof d!=="object")throw new Error("Bulutdagi ma’lumot noto‘g‘ri.");
+  settings=d.settings||settings;records=d.records||records;habitData=d.habitData||habitData;gymData=Array.isArray(d.gymData)?d.gymData:gymData;measureData=Array.isArray(d.measureData)?d.measureData:measureData;photoData=Array.isArray(d.photoData)?d.photoData:photoData;
+  save({sync:false,touch:false});await replaceIndexedPhotos(photoData);const stamp=row.updated_at||new Date().toISOString();localStorage.setItem(CLOUD_LAST_SYNC_KEY,stamp);localStorage.setItem(LOCAL_UPDATED_KEY,stamp);renderAll();setSyncStatus("Bulutdan yuklandi","ok");
+}
+async function downloadStateFromCloud({force=false}={}){
+  if(!cloudSession)throw new Error("Avval akkauntga kiring.");setSyncStatus("Bulutdan yuklanmoqda…","busy");
+  const row=await fetchCloudRow();if(!row){setSyncStatus("Bulutda ma’lumot yo‘q","warn");if(force)setAuthMessage("Bulutda hali ma’lumot yo‘q.","error");return false}
+  if(force||confirm("Bulutdagi ma’lumot ushbu qurilmadagi ma’lumotni almashtiradi. Davom etilsinmi?")){await applyCloudData(row);return true}setSyncStatus("Yuklash bekor qilindi","warn");return false;
+}
+async function initialCloudSync(){
+  if(!cloudSession){updateCloudUI();return}
+  setSyncStatus("Tekshirilmoqda…","busy");
+  try{
+    const row=await fetchCloudRow();
+    if(!row){await uploadStateToCloud({silent:true});return}
+    const cloudTime=Date.parse(row.updated_at||0)||0,localTime=Date.parse(localStorage.getItem(LOCAL_UPDATED_KEY)||0)||0,lastSync=localStorage.getItem(CLOUD_LAST_SYNC_KEY);
+    if(!lastSync&&hasMeaningfulLocalData()){
+      const useCloud=confirm("Bu qurilmada ham, bulutda ham ma’lumot bor. OK — bulutdagini yuklash; Bekor qilish — ushbu qurilmadagini bulutga yuborish.");
+      if(useCloud)await applyCloudData(row);else await uploadStateToCloud({silent:true});return;
+    }
+    if(cloudTime>localTime+1000)await applyCloudData(row);else if(localTime>cloudTime+1000||localStorage.getItem(CLOUD_PENDING_KEY))await uploadStateToCloud({silent:true});else setSyncStatus("Bulut bilan sinxronlandi","ok");
+  }catch(error){setSyncStatus(navigator.onLine?"Sinxronlash xatosi":"Internet yo‘q — lokal","error");setAuthMessage(error.message,"error")}
+}
+async function handleSignIn(){
+  const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;
+  if(!email||password.length<6){setAuthMessage("Email va kamida 6 belgili parol kiriting.","error");return}
+  setAuthMessage("Kirilmoqda…");
+  try{const session=await signInCloud(email,password);storeCloudSession(session);setAuthMessage("Akkauntga kirildi.","success");await initialCloudSync()}catch(error){setAuthMessage(error.message,"error")}
+}
+async function handleSignUp(){
+  const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;
+  if(!email||password.length<6){setAuthMessage("Email va kamida 6 belgili parol kiriting.","error");return}
+  setAuthMessage("Ro‘yxatdan o‘tkazilmoqda…");
+  try{const result=await signUpCloud(email,password);if(result?.access_token){storeCloudSession(result);setAuthMessage("Akkaunt yaratildi va kirildi.","success");await initialCloudSync()}else setAuthMessage("Tasdiqlash xati yuborildi. Emaildagi havolani bosing.","success")}catch(error){setAuthMessage(error.message,"error")}
+}
+
+function openPhotoDB(){return new Promise((resolve,reject)=>{if(!("indexedDB" in window)){resolve(null);return}const request=indexedDB.open("fit-jarvis-db",1);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("photos")){const store=db.createObjectStore("photos",{keyPath:"id"});store.createIndex("date","date",{unique:false})}};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
+function dataURLToBlob(dataURL){const m=/^data:([^;]+);base64,(.+)$/i.exec(dataURL||"");if(!m)return null;const binary=atob(m[2]),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new Blob([bytes],{type:m[1]})}
+function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob)})}
+async function loadIndexedPhotos(){
+  try{const db=await openPhotoDB();if(!db)return [];const items=await new Promise((resolve,reject)=>{const req=db.transaction("photos","readonly").objectStore("photos").getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error)});db.close();const out=[];for(const item of items){if(item?.blob)out.push({id:String(item.id),date:String(item.date||""),type:String(item.type||"Old"),data:await blobToDataURL(item.blob)});else if(item?.data)out.push(item)}return out}catch(_){return []}
+}
+async function replaceIndexedPhotos(items){
+  try{const db=await openPhotoDB();if(!db)return;await new Promise((resolve,reject)=>{const tx=db.transaction("photos","readwrite"),store=tx.objectStore("photos");store.clear();for(const p of items||[]){const blob=dataURLToBlob(p.data);if(blob)store.put({id:String(p.id),date:String(p.date||""),type:String(p.type||"Old"),blob})}tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}catch(_){/* Local fallback remains available. */}
+}
+async function mergeIndexedPhotos(){const indexed=await loadIndexedPhotos();if(!indexed.length)return;const ids=new Set(photoData.map(p=>String(p.id)));for(const p of indexed)if(!ids.has(String(p.id)))photoData.push(p);save({sync:false,touch:false})}
+async function compressPhoto(file){
+  if(!file?.type?.startsWith("image/"))throw new Error("Faqat rasm fayli qabul qilinadi.");
+  const url=URL.createObjectURL(file);try{const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(new Error("Rasm ochilmadi."));i.src=url});const maxSide=1100,scale=Math.min(1,maxSide/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));const ctx=canvas.getContext("2d",{alpha:false});ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);return canvas.toDataURL("image/jpeg",.74)}finally{URL.revokeObjectURL(url)}
+}
+
+const DAY_NAMES=["Yakshanba","Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba"];
+const schedule={
+  0:{type:"Upper / Suzish",plan:"Upper body yoki suzish",kcal:2400,protein:170,carbs:270,fat:70},
+  1:{type:"Suzish / tiklanish",plan:"Yengil suzish yoki faol tiklanish",kcal:2350,protein:170,carbs:255,fat:70},
+  2:{type:"Boks",plan:"Boks mashg‘uloti",kcal:2450,protein:170,carbs:285,fat:70},
+  3:{type:"Dam / ofis",plan:"Dam olish, stretching yoki yurish",kcal:2200,protein:170,carbs:210,fat:75},
+  4:{type:"Boks",plan:"Boks mashg‘uloti",kcal:2450,protein:170,carbs:285,fat:70},
+  5:{type:"Dam / ofis",plan:"Dam olish, stretching yoki yurish",kcal:2200,protein:170,carbs:210,fat:75},
+  6:{type:"Gym oyoq",plan:"Gym — oyoq kuni",kcal:2500,protein:170,carbs:300,fat:70}
+};
+const leg=["Qizish — 5–8 daqiqa","Squat yoki Leg Press — 4×8–12","Romanian Deadlift — 3×8–10","Walking Lunges — 3×10 har oyoq","Leg Curl — 3×10–15","Leg Extension — 3×10–15","Calf Raise — 4×12–20","Plank — 3×45–60 sek"];
+const upper=["Qizish — 5–8 daqiqa","Bench/Dumbbell Press — 4×8–12","Lat Pulldown — 4×8–12","Seated Cable Row — 3×10–12","Shoulder Press — 3×8–10","Lateral Raise — 3×12–15","Face Pull — 3×12–15","Biceps Curl — 3×10–12","Triceps Pushdown — 3×10–12"];
+const habits=["3 litr suv","7 soat uyqu","5 g kreatin","8 000 qadam","Meva yoki sabzavot","Shirin ichimliksiz kun","Fast-foodsiz kun","Sport yoki faol tiklanish","Kitob o‘qish","Telefon vaqtini cheklash"];
+const defaultSettings={goalWeight:80,waterGoal:3,sleepGoal:7,stepsGoal:8000,sportWeight:40,foodWeight:35,sleepWeight:15,waterWeight:10};
+
+function iso(d){return d.toISOString().slice(0,10)}
+function addDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}
+function getStart(){let d=new Date();d.setHours(12,0,0,0);return d}
+let settings=safeParseJSON(localStorage.getItem("fj_settings"),null)||{...defaultSettings};
+let records=safeParseJSON(localStorage.getItem("fj_records"),null)||{};
+let habitData=safeParseJSON(localStorage.getItem("fj_habits"),null)||{};
+let gymData=safeParseJSON(localStorage.getItem("fj_gym"),[])||[];
+let measureData=safeParseJSON(localStorage.getItem("fj_measures"),[])||[];
+let photoData=safeParseJSON(localStorage.getItem("fj_photos"),[])||[];
+
+function ensure30(){
+  const start=getStart();
+  for(let i=0;i<30;i++){
+    const d=addDays(start,i), key=iso(d);
+    if(!records[key]) records[key]={date:key,sport:0,food:0,water:"",sleep:"",weight:"",steps:"",creatine:false,
+      energy:"",mood:"",actualKcal:"",actualProtein:"",foodNote:"",trainingNote:"",extraNote:""};
+  }
+  save({sync:false,touch:false});
+}
+function save(options={}){
+  const {sync=true,touch=true}=options;
+  try{
+    localStorage.setItem("fj_records",JSON.stringify(records));
+    localStorage.setItem("fj_settings",JSON.stringify(settings));
+    localStorage.setItem("fj_habits",JSON.stringify(habitData));
+    localStorage.setItem("fj_gym",JSON.stringify(gymData));
+    localStorage.setItem("fj_measures",JSON.stringify(measureData));
+    const photosRaw=JSON.stringify(photoData);if(photosRaw.length<1800000)localStorage.setItem("fj_photos",photosRaw);else localStorage.removeItem("fj_photos");
+    if(touch)localStorage.setItem(LOCAL_UPDATED_KEY,new Date().toISOString());
+    if(sync)scheduleCloudSync();
+    return true;
+  }catch(error){setSyncStatus("Lokal saqlash xatosi","error");console.error(error);return false}
+}
+function clamp(n,a=0,b=100){n=Number(n)||0;return Math.min(b,Math.max(a,n))}
+function dayPlan(dateStr){return schedule[new Date(dateStr+"T12:00:00").getDay()]}
+function scoreFor(r){
+  const waterPct=clamp((Number(r.water)||0)/settings.waterGoal*100);
+  const sleepPct=clamp((Number(r.sleep)||0)/settings.sleepGoal*100);
+  const p=dayPlan(r.date), activePct=clamp((Number(r.steps)||0)/settings.stepsGoal*100);
+  if(p.type==="Dam olish/ofis" || p.type==="Suzish/yengil") return Math.round(clamp(r.food)*0.45+sleepPct*0.30+waterPct*0.15+activePct*0.10);
+  const sw=Number(settings.sportWeight),fw=Number(settings.foodWeight),slw=Number(settings.sleepWeight),ww=Number(settings.waterWeight),total=sw+fw+slw+ww||100;
+  return Math.round((clamp(r.sport)*sw+clamp(r.food)*fw+sleepPct*slw+waterPct*ww)/total);
+}
+function labelFor(s){return s>=90?"A’lo":s>=80?"Yaxshi":s>=70?"Qoniqarli":s>=60?"O‘rtacha":"Past"}
+function classFor(s){return s>=90?"excellent":s>=80?"good":s>=70?"ok":s>=60?"average":"low"}
+function fmt(n,d=0){return Number(n||0).toFixed(d)}
+
+function showPage(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active",s.id===id));
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));
+  if(id==="statistics") setTimeout(drawStats,50);
+}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+
+function renderDashboard(){
+  const vals=Object.values(records).filter(r=>r.sport||r.food||r.water||r.sleep||r.weight);
+  const avg=(k)=>vals.length?vals.reduce((a,r)=>a+(Number(r[k])||0),0)/vals.filter(r=>Number(r[k])>0).length:0;
+  const weights=vals.filter(r=>r.weight).sort((a,b)=>a.date.localeCompare(b.date));
+  document.getElementById("currentWeight").textContent=(weights.length?weights.at(-1).weight:86)+" kg";
+  document.getElementById("avgSleep").textContent=avg("sleep")?fmt(avg("sleep"),1)+" soat":"—";
+  document.getElementById("avgWater").textContent=avg("water")?fmt(avg("water"),1)+" L":"—";
+  const entered=vals.sort((a,b)=>a.date.localeCompare(b.date));
+  let streak=0;for(let i=entered.length-1;i>=0;i--){if(scoreFor(entered[i])>=70)streak++;else break}
+  document.getElementById("streak").textContent=streak+" kun";
+  const today=iso(getStart()), plan=dayPlan(today), tr=records[today]||{};
+  document.getElementById("todayPlan").innerHTML=`<div class="plan-chip"><b>${DAY_NAMES[new Date(today+"T12:00:00").getDay()]} — ${plan.type}</b><p>${plan.plan}</p></div>`;
+  document.getElementById("todayMacros").innerHTML=[["kkal",plan.kcal],["Oqsil",plan.protein+" g"],["Uglevod",plan.carbs+" g"],["Yog‘",plan.fat+" g"]].map(x=>`<div class="macro"><b>${x[1]}</b><small>${x[0]}</small></div>`).join("");
+  const tips=[]; if(Number(tr.sleep)>0&&Number(tr.sleep)<6)tips.push("Uyqu 6 soatdan kam — intensivlikni pasaytiring."); if(Number(tr.water)>0&&Number(tr.water)<2)tips.push("Suv 2 litrdan kam — suv iste’molini oshiring."); if(Number(tr.actualProtein)>0&&Number(tr.actualProtein)<136)tips.push("Oqsil 80% dan past — oqsil manbai qo‘shing."); document.getElementById("aiAdvice").textContent=tips.length?tips.join(" "):"Bugungi ma’lumotlarni kiriting — tizim avtomatik tavsiya beradi.";
+  const scores=vals.map(scoreFor), overall=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  document.getElementById("overallScore").textContent=overall+"%";
+  let lbl=document.getElementById("scoreLabel");lbl.textContent=labelFor(overall);lbl.className="status "+classFor(overall);
+  document.getElementById("scoreRing").style.background=`conic-gradient(var(--green) ${overall*3.6}deg,rgba(255,255,255,.08) 0deg)`;
+  const metrics=[["Sport",avg("sport")],["Ovqatlanish",avg("food")],["Suv",avg("water")/settings.waterGoal*100],["Uyqu",avg("sleep")/settings.sleepGoal*100]];
+  document.getElementById("scoreBars").innerHTML=metrics.map(([n,v])=>`<div class="progress-row"><div class="progress-label"><span>${n}</span><b>${Math.round(v||0)}%</b></div><div class="bar"><i style="width:${clamp(v)}%"></i></div></div>`).join("");
+  drawLineChart("weightChart",weights.map(r=>r.date.slice(5)),weights.map(r=>Number(r.weight)),{min:78,max:88,color:"#28d7ff"});
+  drawLineChart("scoreChart",entered.map(r=>r.date.slice(5)),entered.map(scoreFor),{min:0,max:100,color:"#34e69a"});
+  drawDualChart("recoveryChart",entered.map(r=>r.date.slice(5)),entered.map(r=>Number(r.sleep)||0),entered.map(r=>Number(r.water)||0));
+}
+function canvasSetup(id){
+  const c=document.getElementById(id);if(!c)return null;const r=c.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  c.width=r.width*dpr;c.height=r.height*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);return {c,x,w:r.width,h:r.height};
+}
+function axes(x,w,h,min,max){
+  x.strokeStyle="#21425b";x.lineWidth=1;x.beginPath();for(let i=0;i<5;i++){let y=25+(h-55)*i/4;x.moveTo(42,y);x.lineTo(w-14,y)}x.stroke();
+  x.fillStyle="#7897ad";x.font="11px Segoe UI";for(let i=0;i<5;i++){let v=Math.round(max-(max-min)*i/4);x.fillText(v,6,29+(h-55)*i/4)}
+}
+function drawLineChart(id,labels,values,opt){
+  const s=canvasSetup(id);if(!s)return;let {x,w,h}=s;x.clearRect(0,0,w,h);axes(x,w,h,opt.min,opt.max);
+  if(values.length<1){x.fillStyle="#6f8ca1";x.fillText("Ma’lumot kiriting",w/2-45,h/2);return}
+  const left=45,right=w-18,top=25,bottom=h-30,step=values.length>1?(right-left)/(values.length-1):0;
+  x.strokeStyle=opt.color;x.lineWidth=3;x.beginPath();values.forEach((v,i)=>{let px=left+i*step,py=bottom-(v-opt.min)/(opt.max-opt.min)*(bottom-top);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();
+  x.fillStyle=opt.color;values.forEach((v,i)=>{let px=left+i*step,py=bottom-(v-opt.min)/(opt.max-opt.min)*(bottom-top);x.beginPath();x.arc(px,py,4,0,Math.PI*2);x.fill()});
+  x.fillStyle="#7897ad";x.font="10px Segoe UI";labels.forEach((l,i)=>{if(i%Math.ceil(labels.length/8)===0)x.fillText(l,left+i*step-10,h-8)});
+}
+function drawDualChart(id,labels,a,b){
+  const s=canvasSetup(id);if(!s)return;let {x,w,h}=s;x.clearRect(0,0,w,h);axes(x,w,h,0,8);
+  const left=45,right=w-18,top=25,bottom=h-30,step=labels.length>1?(right-left)/(labels.length-1):0;
+  [[a,"#b077ff",8],[b,"#28d7ff",4]].forEach(([vals,color,max])=>{x.strokeStyle=color;x.lineWidth=2.5;x.beginPath();vals.forEach((v,i)=>{let px=left+i*step,py=bottom-v/max*(bottom-top);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()});
+  x.fillStyle="#b077ff";x.fillText("Uyqu",w-120,18);x.fillStyle="#28d7ff";x.fillText("Suv",w-65,18);
+}
+
+function renderTracking(){
+  const tbody=document.querySelector("#trackingTable tbody");tbody.innerHTML="";
+  Object.values(records).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,30).forEach((r,i)=>{
+    const p=dayPlan(r.date),s=scoreFor(r),tr=document.createElement("tr");
+    tr.innerHTML=`<td>${i+1}</td><td>${r.date}</td><td>${DAY_NAMES[new Date(r.date+"T12:00:00").getDay()]}</td><td><span class="badge">${p.type}</span></td>
+    <td><input data-k="sport" type="number" min="0" max="100" value="${r.sport}"></td>
+    <td><input data-k="food" type="number" min="0" max="100" value="${r.food}"></td>
+    <td><input data-k="water" type="number" step=".1" value="${r.water}"></td>
+    <td><input data-k="sleep" type="number" step=".1" value="${r.sleep}"></td>
+    <td><input data-k="weight" type="number" step=".1" value="${r.weight}"></td>
+    <td><input data-k="steps" type="number" value="${r.steps}"></td>
+    <td><select data-k="creatine"><option value="true" ${r.creatine?"selected":""}>Ha</option><option value="false" ${!r.creatine?"selected":""}>Yo‘q</option></select></td>
+    <td class="score">${s}%</td><td class="rating ${classFor(s)}">${labelFor(s)}</td>
+    <td><input class="note" data-k="extraNote" value="${(r.extraNote||"").replaceAll('"',"&quot;")}"></td>`;
+    tr.querySelectorAll("input,select").forEach(inp=>inp.onchange=()=>{let v=inp.value;if(inp.dataset.k==="creatine")v=v==="true";records[r.date][inp.dataset.k]=v;save();let sc=scoreFor(records[r.date]);tr.querySelector(".score").textContent=sc+"%";let rt=tr.querySelector(".rating");rt.textContent=labelFor(sc);rt.className="rating "+classFor(sc);renderDashboard()});
+    tbody.appendChild(tr);
+  });
+}
+function renderNutrition(){
+  const unique=[schedule[2],schedule[6],schedule[0],schedule[3]];
+  document.getElementById("nutritionCards").innerHTML=unique.map(p=>`<div class="card nutrition-card"><h3>${p.type}</h3><strong style="font-size:28px">${p.kcal} kkal</strong>
+  <div class="macro-row" style="grid-template-columns:repeat(3,1fr);margin-top:12px"><div class="macro"><b>${p.protein}g</b><small>Oqsil</small></div><div class="macro"><b>${p.carbs}g</b><small>Uglevod</small></div><div class="macro"><b>${p.fat}g</b><small>Yog‘</small></div></div></div>`).join("");
+}
+function renderTraining(){
+  document.getElementById("scheduleCards").innerHTML=[1,2,3,4,5,6,0].map(d=>`<div class="card day"><b>${DAY_NAMES[d]}</b><h3>${schedule[d].type}</h3><p>${schedule[d].plan}</p></div>`).join("");
+  document.getElementById("legWorkout").innerHTML=leg.map(x=>`<div class="plan-chip">${x}</div>`).join("");
+  document.getElementById("upperWorkout").innerHTML=upper.map(x=>`<div class="plan-chip">${x}</div>`).join("");
+}
+function renderHabits(){
+  const key=iso(getStart());habitData[key]??={};
+  document.getElementById("habitList").innerHTML=habits.map((h,i)=>`<div class="habit-item"><span>${h}</span><input type="checkbox" data-i="${i}" ${habitData[key][i]?"checked":""}></div>`).join("");
+  document.querySelectorAll("#habitList input").forEach(c=>c.onchange=()=>{habitData[key][c.dataset.i]=c.checked;save();renderHabitHeatmaps()});
+}
+function loadToday(date){
+  let r=records[date]||{};["sportPct","foodPct","water","sleep","weight","steps","energy","mood","actualKcal","actualProtein","foodNote","trainingNote","extraNote"].forEach(id=>{
+    let key={sportPct:"sport",foodPct:"food"}[id]||id;document.getElementById(id).value=r[key]??"";
+  });document.getElementById("creatine").value=String(!!r.creatine);
+}
+function saveToday(){
+  const date=document.getElementById("todayDate").value;if(!date)return alert("Sana tanlang");
+  records[date]??={date};Object.assign(records[date],{
+    sport:document.getElementById("sportPct").value,food:document.getElementById("foodPct").value,
+    water:document.getElementById("water").value,sleep:document.getElementById("sleep").value,weight:document.getElementById("weight").value,
+    steps:document.getElementById("steps").value,creatine:document.getElementById("creatine").value==="true",
+    energy:document.getElementById("energy").value,mood:document.getElementById("mood").value,
+    actualKcal:document.getElementById("actualKcal").value,actualProtein:document.getElementById("actualProtein").value,
+    foodNote:document.getElementById("foodNote").value,trainingNote:document.getElementById("trainingNote").value,extraNote:document.getElementById("extraNote").value
+  });save();renderAll();alert("Ma’lumot saqlandi");
+}
+function drawStats(){
+  const rows=Object.values(records).sort((a,b)=>a.date.localeCompare(b.date)).filter(r=>r.sport||r.food||r.actualKcal||r.actualProtein);
+  drawTwoLines("disciplineChart",rows.map(r=>r.date.slice(5)),rows.map(r=>Number(r.sport)||0),rows.map(r=>Number(r.food)||0),"#28d7ff","#34e69a","Sport","Ovqat");
+  drawTwoLines("macroChart",rows.map(r=>r.date.slice(5)),rows.map(r=>Number(r.actualKcal)||0),rows.map(r=>Number(r.actualProtein)||0),"#ffb34d","#b077ff","Kkal","Oqsil",2600,200);
+}
+function drawTwoLines(id,labels,a,b,c1,c2,l1,l2,max1=100,max2=100){
+  const s=canvasSetup(id);if(!s)return;let {x,w,h}=s;x.clearRect(0,0,w,h);axes(x,w,h,0,max1);
+  const left=45,right=w-18,top=25,bottom=h-30,step=labels.length>1?(right-left)/(labels.length-1):0;
+  [[a,c1,max1],[b,c2,max2]].forEach(([vals,color,max])=>{x.strokeStyle=color;x.lineWidth=2.5;x.beginPath();vals.forEach((v,i)=>{let px=left+i*step,py=bottom-v/max*(bottom-top);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()});
+  x.fillStyle=c1;x.fillText(l1,w-130,18);x.fillStyle=c2;x.fillText(l2,w-70,18);
+}
+function csvExport(){
+  const head=["Sana","Kun","Reja","Sport %","Ovqat %","Suv L","Uyqu","Vazn","Qadam","Kreatin","Umumiy %","Baho","Izoh"];
+  const rows=Object.values(records).sort((a,b)=>a.date.localeCompare(b.date)).map(r=>[r.date,DAY_NAMES[new Date(r.date+"T12:00:00").getDay()],dayPlan(r.date).type,r.sport,r.food,r.water,r.sleep,r.weight,r.steps,r.creatine?"Ha":"Yo‘q",scoreFor(r),labelFor(scoreFor(r)),r.extraNote||""]);
+  const csv=[head,...rows].map(row=>row.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n");
+  download(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),"FIT_JARVIS_30_kun.csv");
+}
+function download(blob,name){let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function exportJson(){download(new Blob([JSON.stringify({version:4,cloudSync:true,settings,records,habitData,gymData,measureData,photoData},null,2)],{type:"application/json"}),"FIT_JARVIS_v4_backup.json")}
+function importJson(file){let rd=new FileReader();rd.onload=async()=>{try{let d=JSON.parse(rd.result);settings=d.settings||settings;records=d.records||records;habitData=d.habitData||habitData;gymData=Array.isArray(d.gymData)?d.gymData:gymData;measureData=Array.isArray(d.measureData)?d.measureData:measureData;photoData=Array.isArray(d.photoData)?d.photoData:photoData;await replaceIndexedPhotos(photoData);save();renderAll();alert("Backup yuklandi va sinxronlashga tayyorlandi") }catch(e){alert("JSON fayl noto‘g‘ri")}};rd.readAsText(file)}
+function loadSettings(){Object.keys(defaultSettings).forEach(k=>document.getElementById(k).value=settings[k])}
+function saveSettings(){Object.keys(defaultSettings).forEach(k=>settings[k]=Number(document.getElementById(k).value));save();renderAll();alert("Sozlamalar saqlandi")}
+
+function renderGym(){const tb=document.querySelector("#gymTable tbody");if(!tb)return;tb.innerHTML="";gymData.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach((g,i)=>{const tr=document.createElement("tr");tr.innerHTML=`<td>${g.date}</td><td>${g.exercise}</td><td>${g.weight} kg</td><td>${g.sets}</td><td>${g.reps}</td><td>${g.rpe}</td><td>${Math.round(g.weight*g.sets*g.reps)}</td><td>${g.note||""}</td><td><button class="btn danger">×</button></td>`;tr.querySelector("button").onclick=()=>{gymData.splice(gymData.indexOf(g),1);save();renderGym()};tb.appendChild(tr)});const prs={};gymData.forEach(g=>{const k=g.exercise.toLowerCase();if(!prs[k]||Number(g.weight)>Number(prs[k].weight))prs[k]=g});document.getElementById("prList").innerHTML=Object.values(prs).length?Object.values(prs).map(g=>`<div class="plan-chip"><b>${g.exercise}</b>: ${g.weight} kg × ${g.reps}</div>`).join(""):"<p class='muted'>Natija kiritilmagan.</p>"}
+function renderMeasures(){const tb=document.querySelector("#measureTable tbody");if(!tb)return;tb.innerHTML="";measureData.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(m=>{const tr=document.createElement("tr");tr.innerHTML=`<td>${m.date}</td><td>${m.weight}</td><td>${m.waist}</td><td>${m.chest}</td><td>${m.arm}</td><td>${m.thigh}</td><td>${m.bodyFat}</td><td><button class="btn danger">×</button></td>`;tr.querySelector("button").onclick=()=>{measureData.splice(measureData.indexOf(m),1);save();renderMeasures()};tb.appendChild(tr)});drawLineChart("measureChart",measureData.map(m=>m.date.slice(5)),measureData.map(m=>Number(m.waist)||0),{min:60,max:120,color:"#ffb34d"})}
+function renderHabitHeatmaps(){const box=document.getElementById("habitHeatmaps");if(!box)return;const start=addDays(new Date(),-29);box.innerHTML=habits.map((h,idx)=>{let cells="";for(let i=0;i<30;i++){const d=iso(addDays(start,i));cells+=`<div class="heat ${habitData[d]?.[idx]?"on":""}" title="${d}"></div>`}return `<div style="margin-bottom:10px"><small>${h}</small><div class="heatmap">${cells}</div></div>`}).join("")}
+function renderPhotos(){const box=document.getElementById("photoGrid");if(!box)return;box.innerHTML=photoData.length?photoData.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(p=>`<div class="card photo-card"><img src="${p.data}"><h3>${p.type}</h3><p>${p.date}</p><button class="btn danger" data-id="${p.id}">O‘chirish</button></div>`).join(""):"<p class='muted'>Foto kiritilmagan.</p>";box.querySelectorAll("button").forEach(b=>b.onclick=async()=>{photoData=photoData.filter(p=>String(p.id)!==b.dataset.id);await replaceIndexedPhotos(photoData);save();renderPhotos()})}
+function makeWeekly(){const start=new Date(document.getElementById("weekStart").value+"T12:00:00"),rows=[];for(let i=0;i<7;i++){const k=iso(addDays(start,i));if(records[k])rows.push(records[k])}if(!rows.length){document.getElementById("weeklyReport").innerHTML="<p class='muted'>Bu haftada ma’lumot yo‘q.</p>";return}const scores=rows.map(scoreFor),mean=k=>{const a=rows.filter(r=>Number(r[k])>0);return a.length?a.reduce((s,r)=>s+Number(r[k]),0)/a.length:0},best=rows[scores.indexOf(Math.max(...scores))],weak=[["Sport",mean("sport")],["Ovqat",mean("food")],["Uyqu",mean("sleep")/settings.sleepGoal*100],["Suv",mean("water")/settings.waterGoal*100]].sort((a,b)=>a[1]-b[1])[0],total=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);document.getElementById("weeklyReport").innerHTML=`<div class="summary-box"><h3>Haftalik baho: ${total}% — ${labelFor(total)}</h3><p>Sport: ${Math.round(mean("sport"))}%</p><p>Ovqatlanish: ${Math.round(mean("food"))}%</p><p>O‘rtacha uyqu: ${mean("sleep").toFixed(1)} soat</p><p>O‘rtacha suv: ${mean("water").toFixed(1)} L</p><p>Eng yaxshi kun: ${best.date} (${scoreFor(best)}%)</p><p>Eng zaif ko‘rsatkich: ${weak[0]}</p></div>`}
+
+function renderAll(){renderDashboard();renderTracking();renderNutrition();renderTraining();renderHabits();renderHabitHeatmaps();renderGym();renderMeasures();renderPhotos();loadSettings();drawStats()}
+
+async function bootstrap(){
+  extractRedirectSession();loadCloudSession();updateCloudUI();
+  await mergeIndexedPhotos();
+  ensure30();
+  const now=iso(getStart());
+  document.getElementById("todayDate").value=now;loadToday(now);
+  document.getElementById("gymDate").value=document.getElementById("measureDate").value=document.getElementById("photoDate").value=now;
+  document.getElementById("weekStart").value=iso(addDays(getStart(),-getStart().getDay()+1));
+
+  document.getElementById("todayDate").onchange=e=>loadToday(e.target.value);
+  document.getElementById("saveToday").onclick=saveToday;
+  document.getElementById("saveAll").onclick=()=>{save();renderAll();alert("Barcha ma’lumotlar lokal saqlandi va bulutga yuboriladi")};
+  document.getElementById("exportJson").onclick=exportJson;document.getElementById("exportCsv").onclick=csvExport;
+  document.getElementById("importJson").onchange=e=>e.target.files[0]&&importJson(e.target.files[0]);
+  document.getElementById("saveSettings").onclick=saveSettings;
+  window.onresize=()=>{renderDashboard();drawStats()};
+
+  document.getElementById("addGym").onclick=()=>{gymData.push({date:document.getElementById("gymDate").value,exercise:document.getElementById("gymExercise").value||"Mashq",weight:Number(document.getElementById("gymWeight").value)||0,sets:Number(document.getElementById("gymSets").value)||0,reps:Number(document.getElementById("gymReps").value)||0,rpe:Number(document.getElementById("gymRpe").value)||0,note:document.getElementById("gymNote").value});save();renderGym()};
+  document.getElementById("addMeasure").onclick=()=>{measureData.push({date:document.getElementById("measureDate").value,weight:Number(document.getElementById("mWeight").value)||0,waist:Number(document.getElementById("waist").value)||0,chest:Number(document.getElementById("chest").value)||0,arm:Number(document.getElementById("arm").value)||0,thigh:Number(document.getElementById("thigh").value)||0,bodyFat:Number(document.getElementById("bodyFat").value)||0});save();renderMeasures()};
+  document.getElementById("addPhoto").onclick=async()=>{const f=document.getElementById("photoFile").files[0];if(!f)return alert("Rasm tanlang");const button=document.getElementById("addPhoto"),old=button.textContent;button.disabled=true;button.textContent="Siqilmoqda…";try{const data=await compressPhoto(f);photoData.push({id:String(Date.now()),date:document.getElementById("photoDate").value,type:document.getElementById("photoType").value,data});await replaceIndexedPhotos(photoData);save();renderPhotos();document.getElementById("photoFile").value=""}catch(error){alert(error.message||"Foto saqlanmadi") }finally{button.disabled=false;button.textContent=old}};
+  document.getElementById("makeWeekly").onclick=makeWeekly;
+
+  document.getElementById("accountBtn").onclick=openAuth;document.getElementById("closeAuth").onclick=closeAuth;
+  document.getElementById("authModal").onclick=e=>{if(e.target.id==="authModal")closeAuth()};
+  document.getElementById("signInBtn").onclick=handleSignIn;document.getElementById("signUpBtn").onclick=handleSignUp;
+  document.getElementById("modalLogoutBtn").onclick=logoutCloud;document.getElementById("logoutCloud").onclick=logoutCloud;
+  document.getElementById("syncNowBtn").onclick=initialCloudSync;
+  document.getElementById("forceDownloadBtn").onclick=()=>downloadStateFromCloud({force:true}).catch(e=>setAuthMessage(e.message,"error"));
+  document.getElementById("downloadCloud").onclick=()=>downloadStateFromCloud({force:false}).catch(e=>alert(e.message));
+  document.getElementById("forceUploadBtn").onclick=()=>uploadStateToCloud().then(ok=>ok&&setAuthMessage("Qurilmadagi ma’lumot bulutga yuborildi.","success"));
+  document.getElementById("uploadCloud").onclick=()=>{if(confirm("Ushbu qurilmadagi ma’lumot bulutdagi nusxani yangilaydi. Davom etilsinmi?"))uploadStateToCloud()};
+  document.getElementById("authPassword").addEventListener("keydown",e=>{if(e.key==="Enter")handleSignIn()});
+
+  renderAll();cloudBooting=false;await initialCloudSync();
+  window.addEventListener("online",()=>{setSyncStatus("Internet qaytdi — sinxronlanmoqda","busy");initialCloudSync()});
+  window.addEventListener("offline",()=>setSyncStatus("Internet yo‘q — lokal saqlandi","warn"));
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+}
+bootstrap().catch(error=>{console.error(error);setSyncStatus("Portal yuklash xatosi","error")});
+
+</script>
 </body>
 </html>
