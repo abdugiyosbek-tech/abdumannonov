@@ -1,11 +1,11 @@
 {
-  "name": "FIT JARVIS v4 Cloud Sync",
+  "name": "FIT JARVIS v5 Safe Cloud Sync",
   "short_name": "FIT JARVIS",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#050d17",
   "theme_color": "#071321",
-  "description": "Fitness va progress portali — telefon va kompyuter o‘rtasida Supabase bulut sinxronizatsiyasi.",
+  "description": "Fitness va progress portali — xavfsiz Supabase sinxronizatsiyasi, lokal backup va to‘liq mobil menyu.",
   "icons": []
 }

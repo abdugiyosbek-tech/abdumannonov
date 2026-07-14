@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FIT JARVIS v4 — Cloud Sync</title>
-<meta name="description" content="FIT JARVIS v4 — fitness, ovqatlanish va progress uchun telefon-kompyuter bulut sinxronizatsiyali portal.">
+<title>FIT JARVIS v5 — Safe Cloud Sync</title>
+<meta name="description" content="FIT JARVIS v5 — xavfsiz telefon-kompyuter sinxronizatsiyasi, avtomatik backup va to‘liq mobil menyuli fitness portali.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' https://bgdcapcopsrvgsgwewlg.supabase.co; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#071321">
 <style>
@@ -79,9 +79,10 @@ background:rgba(255,179,77,.08);border-radius:8px}
 .footer{margin-top:18px;text-align:center;color:#5e829b;font-size:12px}
 @media(max-width:1050px){.app{grid-template-columns:80px 1fr}.brand div,.nav button span,.mode{display:none}.sidebar{padding:15px 10px}.nav button{justify-content:center}
 .kpis{grid-template-columns:repeat(3,1fr)}.dashboard-grid,.chart-grid{grid-template-columns:1fr}.nutrition-cards{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:720px){.app{display:block}.sidebar{position:sticky;height:auto;z-index:5;display:flex;padding:8px;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}
-.brand{padding:0 8px}.logo{width:38px;height:38px}.nav{display:flex}.nav button{width:auto}.main{padding:14px}.topbar{display:block}.actions{justify-content:flex-start}
-.kpis,.form-grid,.nutrition-cards,.habits,.schedule{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}}
+@media(max-width:720px){.app{display:block}.sidebar{position:sticky;height:auto;z-index:50;display:flex;align-items:center;padding:8px;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--line);scrollbar-width:thin}
+.brand{padding:0 8px;flex:0 0 auto}.brand div:not(.logo){display:none}.logo{width:38px;height:38px}.nav{display:flex;gap:4px;min-width:max-content}.nav button{width:auto;flex:0 0 auto;justify-content:flex-start;white-space:nowrap;padding:10px}.nav button span{display:inline!important;font-size:12px}.main{padding:14px}.topbar{display:block}.actions{justify-content:flex-start}
+.kpis,.form-grid,.nutrition-cards,.habits,.schedule{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}.title h2{font-size:24px}.dashboard-grid{grid-template-columns:1fr}.chart-grid{grid-template-columns:1fr}}
+@media(max-width:460px){.kpis,.form-grid,.nutrition-cards,.habits,.schedule{grid-template-columns:1fr}.wide{grid-column:span 1}.macro-row{grid-template-columns:repeat(2,1fr)}.auth-card{max-height:92vh;overflow:auto}}
 
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.photo-card img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:#071421}.heatmap{display:grid;grid-template-columns:repeat(30,1fr);gap:4px}.heat{aspect-ratio:1;border-radius:4px;background:#173044}.heat.on{background:#36e69b}.summary-box{padding:13px;border-left:3px solid var(--green);background:rgba(52,230,154,.08);border-radius:9px}.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
@@ -108,7 +109,7 @@ background:rgba(255,179,77,.08);border-radius:8px}
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="logo">FJ</div><div><h1>FIT JARVIS</h1><small>Shaxsiy portal v4.0 Cloud</small></div></div>
+    <div class="brand"><div class="logo">FJ</div><div><h1>FIT JARVIS</h1><small>Shaxsiy portal v5.0 Safe Sync</small></div></div>
     <nav class="nav">
       <button class="active" data-page="dashboard">⌂ <span>Asosiy</span></button>
       <button data-page="today">◉ <span>Bugungi reja</span></button>
@@ -277,14 +278,16 @@ background:rgba(255,179,77,.08);border-radius:8px}
         <h3>Bulut sinxronizatsiyasi</h3>
         <p class="muted" id="cloudAccountText">Akkauntga kirilmagan. Ma’lumotlar faqat shu qurilmada saqlanadi.</p>
         <div class="cloud-grid">
-          <button class="btn" id="downloadCloud" type="button">Bulutdan yuklash</button>
-          <button class="btn" id="uploadCloud" type="button">Bulutga yuborish</button>
+          <button class="btn primary" id="mergeCloud" type="button">Xavfsiz birlashtirish</button>
+          <button class="btn" id="downloadCloud" type="button">Bulutdan almashtirish</button>
+          <button class="btn" id="uploadCloud" type="button">Bulutga almashtirish</button>
+          <button class="btn" id="restoreBackupSettings" type="button">Backupni tiklash</button>
           <button class="btn danger" id="logoutCloud" type="button">Akkauntdan chiqish</button>
         </div>
-        <p class="small-note">Avtomatik sinxronlash akkauntga kirilganda ishlaydi. JSON backup tugmasi qo‘shimcha xavfsizlik uchun saqlab qolingan.</p>
+        <p class="small-note">Birinchi ulanishda portal hech narsani avtomatik o‘chirmaydi. “Xavfsiz birlashtirish” lokal va bulutdagi ma’lumotlarni qo‘shib saqlaydi. Majburiy almashtirishdan oldin avtomatik backup olinadi.</p>
       </div>
     </section>
-    <div class="footer">FIT JARVIS v4 — ma’lumotlar lokal va akkauntga kirilganda Supabase bulutida saqlanadi. Tibbiy tashxis vositasi emas.</div>
+    <div class="footer">FIT JARVIS v5 — lokal saqlash, xavfsiz birlashtirish va Supabase bulut sinxronizatsiyasi. Tibbiy tashxis vositasi emas.</div>
   </main>
 </div>
 
@@ -309,9 +312,10 @@ background:rgba(255,179,77,.08);border-radius:8px}
     <div id="signedInPanel" hidden>
       <div class="account-box"><span>Akkaunt</span><b id="accountEmail">—</b></div>
       <div class="auth-tools">
-        <button class="btn primary" id="syncNowBtn" type="button">Hozir sinxronlash</button>
-        <button class="btn" id="forceDownloadBtn" type="button">Bulutdan majburan yuklash</button>
-        <button class="btn" id="forceUploadBtn" type="button">Qurilmadan bulutga yuborish</button>
+        <button class="btn primary" id="syncNowBtn" type="button">Xavfsiz birlashtirish (tavsiya)</button>
+        <button class="btn" id="forceDownloadBtn" type="button">Bulutdagini qurilmaga almashtirish</button>
+        <button class="btn" id="forceUploadBtn" type="button">Qurilmadagidan bulutni almashtirish</button>
+        <button class="btn" id="restoreBackupBtn" type="button">Oxirgi avtomatik backupni tiklash</button>
         <button class="btn danger" id="modalLogoutBtn" type="button">Chiqish</button>
       </div>
     </div>
@@ -327,11 +331,14 @@ const CLOUD_SESSION_KEY="fj_supabase_session";
 const CLOUD_LAST_SYNC_KEY="fj_cloud_last_sync";
 const LOCAL_UPDATED_KEY="fj_local_updated_at";
 const CLOUD_PENDING_KEY="fj_cloud_pending";
+const CLOUD_READY_USER_KEY="fj_cloud_ready_user";
+const AUTO_BACKUPS_KEY="fj_auto_backups_v5";
 const CANONICAL_PORTAL_URL="https://abdugiyosbek-tech.github.io/abdumannonov/";
 let cloudSession=null;
 let cloudSyncTimer=null;
 let cloudBusy=false;
 let cloudBooting=true;
+let cloudSyncReady=false;
 
 function safeParseJSON(raw,fallback=null){try{return raw?JSON.parse(raw):fallback}catch(_){return fallback}}
 function jwtPayload(token){try{const part=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(decodeURIComponent(escape(atob(part))))}catch(_){return {}}}
@@ -341,11 +348,14 @@ function normalizeSession(raw){
   const expiresAt=Number(raw.expires_at||payload.exp||0);
   return {...raw,expires_at:expiresAt,user:raw.user||{id:payload.sub,email:payload.email}};
 }
-function loadCloudSession(){cloudSession=normalizeSession(safeParseJSON(localStorage.getItem(CLOUD_SESSION_KEY)));return cloudSession}
-function storeCloudSession(session){cloudSession=normalizeSession(session);if(cloudSession)localStorage.setItem(CLOUD_SESSION_KEY,JSON.stringify(cloudSession));else localStorage.removeItem(CLOUD_SESSION_KEY);updateCloudUI()}
+function loadCloudSession(){cloudSession=normalizeSession(safeParseJSON(localStorage.getItem(CLOUD_SESSION_KEY)));cloudSyncReady=isCloudReadyForCurrentUser();return cloudSession}
+function storeCloudSession(session){cloudSession=normalizeSession(session);if(cloudSession)localStorage.setItem(CLOUD_SESSION_KEY,JSON.stringify(cloudSession));else localStorage.removeItem(CLOUD_SESSION_KEY);cloudSyncReady=isCloudReadyForCurrentUser();updateCloudUI()}
 function setSyncStatus(text,kind=""){const el=document.getElementById("syncStatus");if(!el)return;el.textContent=text;el.className=`sync-pill ${kind}`.trim()}
 function setAuthMessage(text,kind=""){const el=document.getElementById("authMessage");if(!el)return;el.textContent=text||"";el.className=`auth-message ${kind}`.trim()}
 function sessionUser(){if(!cloudSession)return null;const p=jwtPayload(cloudSession.access_token);return cloudSession.user||{id:p.sub,email:p.email}}
+function isCloudReadyForCurrentUser(){const user=sessionUser();return Boolean(user?.id&&localStorage.getItem(CLOUD_READY_USER_KEY)===user.id)}
+function markCloudReady(){const user=sessionUser();if(user?.id){localStorage.setItem(CLOUD_READY_USER_KEY,user.id);cloudSyncReady=true}}
+function requireSyncChoice(message="Avval xavfsiz birlashtirish yoki manba tanlash kerak."){cloudSyncReady=false;setSyncStatus("Sinxronlash tanlovi kerak","warn");setAuthMessage(message,"error")}
 function updateCloudUI(){
   const user=sessionUser(),logged=Boolean(user?.id);
   const accountBtn=document.getElementById("accountBtn");
@@ -353,8 +363,8 @@ function updateCloudUI(){
   const out=document.getElementById("signedOutPanel"),inside=document.getElementById("signedInPanel");
   if(out)out.hidden=logged;if(inside)inside.hidden=!logged;
   const email=document.getElementById("accountEmail");if(email)email.textContent=user?.email||"Akkaunt";
-  const cloudText=document.getElementById("cloudAccountText");if(cloudText)cloudText.textContent=logged?`${user.email||"Akkaunt"} — avtomatik sinxronlash faol.`:"Akkauntga kirilmagan. Ma’lumotlar faqat shu qurilmada saqlanadi.";
-  ["downloadCloud","uploadCloud","logoutCloud"].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!logged});
+  const cloudText=document.getElementById("cloudAccountText");if(cloudText)cloudText.textContent=logged?(cloudSyncReady?`${user.email||"Akkaunt"} — xavfsiz avtomatik sinxronlash faol.`:`${user.email||"Akkaunt"} — birinchi sinxronlash uchun manba tanlang.`):"Akkauntga kirilmagan. Ma’lumotlar faqat shu qurilmada saqlanadi.";
+  ["downloadCloud","uploadCloud","mergeCloud","logoutCloud"].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=!logged});
   if(!logged)setSyncStatus(navigator.onLine?"Faqat lokal":"Internet yo‘q","warn");
 }
 function openAuth(){document.getElementById("authModal")?.classList.remove("hidden");setAuthMessage("");updateCloudUI()}
@@ -377,19 +387,66 @@ async function ensureValidSession(){
 }
 async function logoutCloud(){
   try{if(cloudSession?.access_token)await fetch(`${SUPABASE_URL}/auth/v1/logout`,{method:"POST",headers:authHeaders(cloudSession.access_token)})}catch(_){}
-  storeCloudSession(null);localStorage.removeItem(CLOUD_PENDING_KEY);setAuthMessage("Akkauntdan chiqildi.","success");closeAuth();
+  cloudSyncReady=false;storeCloudSession(null);localStorage.removeItem(CLOUD_PENDING_KEY);setAuthMessage("Akkauntdan chiqildi.","success");closeAuth();
 }
 function extractRedirectSession(){
   const hash=new URLSearchParams(location.hash.replace(/^#/,""));
   if(hash.get("error_description")){setTimeout(()=>{openAuth();setAuthMessage(hash.get("error_description"),"error")},0);history.replaceState({},document.title,location.pathname+location.search);return}
   const access=hash.get("access_token");
-  if(access){const session={access_token:access,refresh_token:hash.get("refresh_token"),expires_in:Number(hash.get("expires_in")||3600),expires_at:Math.floor(Date.now()/1000)+Number(hash.get("expires_in")||3600),token_type:hash.get("token_type")||"bearer"};storeCloudSession(session);history.replaceState({},document.title,location.pathname+location.search);setTimeout(()=>{openAuth();setAuthMessage("Email tasdiqlandi. Bulut sinxronizatsiyasi tayyor.","success")},0)}
+  if(access){const session={access_token:access,refresh_token:hash.get("refresh_token"),expires_in:Number(hash.get("expires_in")||3600),expires_at:Math.floor(Date.now()/1000)+Number(hash.get("expires_in")||3600),token_type:hash.get("token_type")||"bearer"};storeCloudSession(session);history.replaceState({},document.title,location.pathname+location.search);setTimeout(()=>{openAuth();setAuthMessage("Email tasdiqlandi. Endi xavfsiz birlashtirishni bosing.","success")},0)}
 }
-function hasMeaningfulLocalData(){
-  const meaningfulRecord=Object.values(records||{}).some(r=>Number(r.sport)||Number(r.food)||Number(r.water)||Number(r.sleep)||Number(r.weight)||Number(r.steps)||Number(r.actualKcal)||Number(r.actualProtein)||(r.foodNote||r.trainingNote||r.extraNote||"").trim());
-  return meaningfulRecord||Object.values(habitData||{}).some(v=>Array.isArray(v)?v.some(Boolean):Object.values(v||{}).some(Boolean))||gymData.length>0||measureData.length>0||photoData.length>0;
+function recordHasData(r){return Boolean(r&&(Number(r.sport)||Number(r.food)||Number(r.water)||Number(r.sleep)||Number(r.weight)||Number(r.steps)||Number(r.actualKcal)||Number(r.actualProtein)||(r.foodNote||r.trainingNote||r.extraNote||"").trim()))}
+function hasMeaningfulState(d){
+  if(!d||typeof d!=="object")return false;
+  const rs=d.records||{};
+  const habitsState=d.habitData||{};
+  return Object.values(rs).some(recordHasData)||Object.values(habitsState).some(v=>Array.isArray(v)?v.some(Boolean):Object.values(v||{}).some(Boolean))||(d.gymData||[]).length>0||(d.measureData||[]).length>0||(d.photoData||[]).length>0;
 }
-function cloudPayload(){return {version:4,settings,records,habitData,gymData,measureData,photoData}}
+function hasMeaningfulLocalData(){return hasMeaningfulState(cloudPayload())}
+function cloudPayload(){return {version:5,settings,records,habitData,gymData,measureData,photoData}}
+function localUpdatedTime(){return Date.parse(localStorage.getItem(LOCAL_UPDATED_KEY)||0)||0}
+function isEmptyValue(v){return v===undefined||v===null||v===""}
+function mergePreferredObject(other={},preferred={}){const out={...other};for(const [k,v] of Object.entries(preferred||{})){if(!isEmptyValue(v)||isEmptyValue(out[k]))out[k]=v}return out}
+function itemKey(item,index){if(item?.id!=null)return `id:${item.id}`;const keys=["date","exercise","type","weight","sets","reps","waist","chest","arm","thigh","bodyFat"];return keys.map(k=>String(item?.[k]??"")).join("|")||`i:${index}`}
+function mergePreferredArray(other=[],preferred=[]){const map=new Map();(other||[]).forEach((x,i)=>map.set(itemKey(x,i),x));(preferred||[]).forEach((x,i)=>map.set(itemKey(x,i),x));return [...map.values()]}
+function mergeStates(localState,cloudState,prefer="local"){
+  const preferred=prefer==="local"?localState:cloudState,other=prefer==="local"?cloudState:localState;
+  const out={version:5,settings:mergePreferredObject(other?.settings,preferred?.settings),records:{},habitData:{},gymData:[],measureData:[],photoData:[]};
+  const dates=new Set([...Object.keys(other?.records||{}),...Object.keys(preferred?.records||{})]);
+  dates.forEach(date=>{out.records[date]=mergePreferredObject(other?.records?.[date]||{},preferred?.records?.[date]||{});out.records[date].date=out.records[date].date||date});
+  const habitDates=new Set([...Object.keys(other?.habitData||{}),...Object.keys(preferred?.habitData||{})]);
+  habitDates.forEach(date=>{out.habitData[date]=mergePreferredObject(other?.habitData?.[date]||{},preferred?.habitData?.[date]||{})});
+  out.gymData=mergePreferredArray(other?.gymData,preferred?.gymData);
+  out.measureData=mergePreferredArray(other?.measureData,preferred?.measureData);
+  out.photoData=mergePreferredArray(other?.photoData,preferred?.photoData);
+  return out;
+}
+function storeBackupState(state,reason){
+  try{
+    if(!state||typeof state!=="object"||!hasMeaningfulState(state))return false;
+    let data=JSON.parse(JSON.stringify(state));
+    let raw=JSON.stringify(data);
+    if(raw.length>1800000){data.photoData=[];data.photosOmittedFromAutoBackup=true;raw=JSON.stringify(data)}
+    let backups=safeParseJSON(localStorage.getItem(AUTO_BACKUPS_KEY),[])||[];
+    backups.unshift({id:String(Date.now()),created_at:new Date().toISOString(),reason,data});
+    backups=backups.slice(0,5);
+    while(backups.length>1&&JSON.stringify(backups).length>3800000)backups.pop();
+    localStorage.setItem(AUTO_BACKUPS_KEY,JSON.stringify(backups));return true;
+  }catch(error){console.warn("Backup saqlanmadi",error);return false}
+}
+function snapshotLocalState(reason){return storeBackupState(cloudPayload(),reason)}
+function applyStateObject(d,{render=true,touch=false}={}){
+  if(!d||typeof d!=="object")throw new Error("Ma’lumot formati noto‘g‘ri.");
+  settings=d.settings||settings;records=d.records||records;habitData=d.habitData||habitData;gymData=Array.isArray(d.gymData)?d.gymData:gymData;measureData=Array.isArray(d.measureData)?d.measureData:measureData;photoData=Array.isArray(d.photoData)?d.photoData:photoData;
+  save({sync:false,touch});if(render)renderAll();
+}
+function restoreLatestBackup(){
+  const backups=safeParseJSON(localStorage.getItem(AUTO_BACKUPS_KEY),[])||[];
+  if(!backups.length){setAuthMessage("Avtomatik backup topilmadi.","error");return false}
+  const b=backups[0];
+  if(!confirm(`${b.created_at.slice(0,19).replace("T"," ")} dagi backup tiklansinmi? Hozirgi holat ham alohida backup qilinadi.`))return false;
+  snapshotLocalState("Backup tiklashdan oldingi holat");applyStateObject(b.data,{render:true,touch:true});cloudSyncReady=false;localStorage.removeItem(CLOUD_READY_USER_KEY);setSyncStatus("Backup tiklandi — birlashtirish kerak","warn");setAuthMessage("Oxirgi backup tiklandi. Endi xavfsiz birlashtirishni bosing.","success");return true;
+}
 async function cloudRequest(path,options={}){
   await ensureValidSession();
   let response=await fetch(`${SUPABASE_URL}${path}`,{...options,headers:{...authHeaders(cloudSession.access_token),...(options.headers||{})}});
@@ -401,53 +458,77 @@ async function fetchCloudRow(){
   const rows=await cloudRequest(`/rest/v1/user_state?select=data,updated_at&user_id=eq.${encodeURIComponent(user.id)}&limit=1`,{method:"GET",headers:{Accept:"application/json"}});
   return Array.isArray(rows)?rows[0]||null:null;
 }
-async function uploadStateToCloud({silent=false}={}){
-  if(!cloudSession||cloudBusy)return false;if(!navigator.onLine){localStorage.setItem(CLOUD_PENDING_KEY,"1");setSyncStatus("Internet yo‘q — lokal saqlandi","warn");return false}
+async function uploadStateToCloud({silent=false,allowUnready=false,backupCloud=true}={}){
+  if(!cloudSession||cloudBusy)return false;
+  if(!allowUnready&&!cloudSyncReady){requireSyncChoice();return false}
+  if(!navigator.onLine){localStorage.setItem(CLOUD_PENDING_KEY,"1");setSyncStatus("Internet yo‘q — lokal saqlandi","warn");return false}
   cloudBusy=true;if(!silent)setSyncStatus("Bulutga saqlanmoqda…","busy");
   try{
+    if(backupCloud){const previous=await fetchCloudRow();if(previous?.data)storeBackupState(previous.data,"Bulut ustiga yozishdan oldingi nusxa")}
     const user=sessionUser();if(!user?.id)throw new Error("Foydalanuvchi aniqlanmadi.");
     const updatedAt=new Date().toISOString();
     const rows=await cloudRequest("/rest/v1/user_state?on_conflict=user_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=representation"},body:JSON.stringify({user_id:user.id,data:cloudPayload(),updated_at:updatedAt})});
     const savedAt=Array.isArray(rows)&&rows[0]?.updated_at?rows[0].updated_at:updatedAt;
-    localStorage.setItem(CLOUD_LAST_SYNC_KEY,savedAt);localStorage.setItem(LOCAL_UPDATED_KEY,savedAt);localStorage.removeItem(CLOUD_PENDING_KEY);setSyncStatus("Bulut bilan sinxronlandi","ok");return true;
+    localStorage.setItem(CLOUD_LAST_SYNC_KEY,savedAt);localStorage.setItem(LOCAL_UPDATED_KEY,savedAt);localStorage.removeItem(CLOUD_PENDING_KEY);markCloudReady();updateCloudUI();setSyncStatus("Bulut bilan sinxronlandi","ok");return true;
   }catch(error){localStorage.setItem(CLOUD_PENDING_KEY,"1");setSyncStatus("Sinxronlash xatosi","error");if(!silent)setAuthMessage(error.message,"error");return false}finally{cloudBusy=false}
 }
-function scheduleCloudSync(){if(cloudBooting||!cloudSession)return;clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>uploadStateToCloud({silent:true}),1200)}
-async function applyCloudData(row){
+function scheduleCloudSync(){if(cloudBooting||!cloudSession||!cloudSyncReady)return;clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>mergeCloudAndLocal({silent:true}),1200)}
+async function applyCloudData(row,{backupLocal=true}={}){
   const d=row?.data;if(!d||typeof d!=="object")throw new Error("Bulutdagi ma’lumot noto‘g‘ri.");
-  settings=d.settings||settings;records=d.records||records;habitData=d.habitData||habitData;gymData=Array.isArray(d.gymData)?d.gymData:gymData;measureData=Array.isArray(d.measureData)?d.measureData:measureData;photoData=Array.isArray(d.photoData)?d.photoData:photoData;
-  save({sync:false,touch:false});await replaceIndexedPhotos(photoData);const stamp=row.updated_at||new Date().toISOString();localStorage.setItem(CLOUD_LAST_SYNC_KEY,stamp);localStorage.setItem(LOCAL_UPDATED_KEY,stamp);renderAll();setSyncStatus("Bulutdan yuklandi","ok");
+  if(backupLocal)snapshotLocalState("Bulutdan almashtirishdan oldingi lokal nusxa");
+  applyStateObject(d,{render:false,touch:false});await replaceIndexedPhotos(photoData);const stamp=row.updated_at||new Date().toISOString();localStorage.setItem(CLOUD_LAST_SYNC_KEY,stamp);localStorage.setItem(LOCAL_UPDATED_KEY,stamp);markCloudReady();renderAll();updateCloudUI();setSyncStatus("Bulutdan yuklandi","ok");
 }
 async function downloadStateFromCloud({force=false}={}){
   if(!cloudSession)throw new Error("Avval akkauntga kiring.");setSyncStatus("Bulutdan yuklanmoqda…","busy");
-  const row=await fetchCloudRow();if(!row){setSyncStatus("Bulutda ma’lumot yo‘q","warn");if(force)setAuthMessage("Bulutda hali ma’lumot yo‘q.","error");return false}
-  if(force||confirm("Bulutdagi ma’lumot ushbu qurilmadagi ma’lumotni almashtiradi. Davom etilsinmi?")){await applyCloudData(row);return true}setSyncStatus("Yuklash bekor qilindi","warn");return false;
+  const row=await fetchCloudRow();if(!row||!hasMeaningfulState(row.data)){setSyncStatus("Bulutda ma’lumot yo‘q","warn");setAuthMessage("Bulutda mazmunli ma’lumot topilmadi.","error");return false}
+  if(force||confirm("Bulutdagi ma’lumot ushbu qurilmadagi holatni almashtiradi. Avtomatik backup olinadi. Davom etilsinmi?")){await applyCloudData(row,{backupLocal:true});setAuthMessage("Bulutdagi nusxa qurilmaga yuklandi.","success");return true}setSyncStatus("Yuklash bekor qilindi","warn");return false;
+}
+async function replaceCloudFromLocal(){
+  if(!cloudSession)throw new Error("Avval akkauntga kiring.");
+  if(!confirm("Ushbu qurilmadagi ma’lumot bulutdagi holatni almashtiradi. Bulutning oldingi nusxasi avtomatik backup qilinadi. Davom etilsinmi?"))return false;
+  const ok=await uploadStateToCloud({allowUnready:true,backupCloud:true});if(ok)setAuthMessage("Qurilmadagi ma’lumot bulutga yuborildi.","success");return ok;
+}
+async function mergeCloudAndLocal({silent=false}={}){
+  if(!cloudSession)return false;if(cloudBusy)return false;
+  setSyncStatus("Xavfsiz birlashtirilmoqda…","busy");
+  try{
+    const row=await fetchCloudRow(),localState=cloudPayload();
+    if(!row||!hasMeaningfulState(row.data)){
+      if(hasMeaningfulState(localState)){const ok=await uploadStateToCloud({silent,allowUnready:true,backupCloud:false});if(ok&&!silent)setAuthMessage("Lokal ma’lumot xavfsiz tarzda bulutga yuborildi.","success");return ok}
+      markCloudReady();setSyncStatus("Sinxronlandi — ma’lumot hali yo‘q","ok");return true;
+    }
+    if(!hasMeaningfulState(localState)){await applyCloudData(row,{backupLocal:false});if(!silent)setAuthMessage("Bulutdagi ma’lumot ushbu bo‘sh qurilmaga yuklandi.","success");return true}
+    snapshotLocalState("Xavfsiz birlashtirishdan oldingi lokal nusxa");storeBackupState(row.data,"Xavfsiz birlashtirishdan oldingi bulut nusxasi");
+    const cloudTime=Date.parse(row.updated_at||0)||0,prefer=localUpdatedTime()>cloudTime?"local":"cloud";
+    const merged=mergeStates(localState,row.data,prefer);
+    applyStateObject(merged,{render:false,touch:false});await replaceIndexedPhotos(photoData);markCloudReady();
+    const ok=await uploadStateToCloud({silent:true,allowUnready:true,backupCloud:false});renderAll();updateCloudUI();
+    if(ok&&!silent)setAuthMessage("Lokal va bulutdagi ma’lumotlar xavfsiz birlashtirildi.","success");return ok;
+  }catch(error){setSyncStatus(navigator.onLine?"Sinxronlash xatosi":"Internet yo‘q — lokal","error");if(!silent)setAuthMessage(error.message,"error");return false}
 }
 async function initialCloudSync(){
   if(!cloudSession){updateCloudUI();return}
-  setSyncStatus("Tekshirilmoqda…","busy");
+  cloudSyncReady=isCloudReadyForCurrentUser();setSyncStatus("Tekshirilmoqda…","busy");
   try{
-    const row=await fetchCloudRow();
-    if(!row){await uploadStateToCloud({silent:true});return}
-    const cloudTime=Date.parse(row.updated_at||0)||0,localTime=Date.parse(localStorage.getItem(LOCAL_UPDATED_KEY)||0)||0,lastSync=localStorage.getItem(CLOUD_LAST_SYNC_KEY);
-    if(!lastSync&&hasMeaningfulLocalData()){
-      const useCloud=confirm("Bu qurilmada ham, bulutda ham ma’lumot bor. OK — bulutdagini yuklash; Bekor qilish — ushbu qurilmadagini bulutga yuborish.");
-      if(useCloud)await applyCloudData(row);else await uploadStateToCloud({silent:true});return;
-    }
-    if(cloudTime>localTime+1000)await applyCloudData(row);else if(localTime>cloudTime+1000||localStorage.getItem(CLOUD_PENDING_KEY))await uploadStateToCloud({silent:true});else setSyncStatus("Bulut bilan sinxronlandi","ok");
+    const row=await fetchCloudRow(),localMeaning=hasMeaningfulLocalData(),cloudMeaning=Boolean(row&&hasMeaningfulState(row.data));
+    if(cloudSyncReady){await mergeCloudAndLocal({silent:true});return}
+    if(cloudMeaning&&!localMeaning){await applyCloudData(row,{backupLocal:false});setAuthMessage("Bulutdagi ma’lumot bo‘sh qurilmaga xavfsiz yuklandi.","success");return}
+    if(localMeaning&&!cloudMeaning){requireSyncChoice("Bulut bo‘sh. Kompyuterdagi ma’lumotni saqlash uchun “Qurilmadagidan bulutni almashtirish” yoki “Xavfsiz birlashtirish”ni bosing.");return}
+    if(localMeaning&&cloudMeaning){requireSyncChoice("Ikkala tomonda ham ma’lumot bor. Hech narsa o‘chirilmasligi uchun “Xavfsiz birlashtirish”ni bosing.");return}
+    markCloudReady();setSyncStatus("Sinxronlandi — ma’lumot hali yo‘q","ok");updateCloudUI();
   }catch(error){setSyncStatus(navigator.onLine?"Sinxronlash xatosi":"Internet yo‘q — lokal","error");setAuthMessage(error.message,"error")}
 }
 async function handleSignIn(){
   const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;
   if(!email||password.length<6){setAuthMessage("Email va kamida 6 belgili parol kiriting.","error");return}
   setAuthMessage("Kirilmoqda…");
-  try{const session=await signInCloud(email,password);storeCloudSession(session);setAuthMessage("Akkauntga kirildi.","success");await initialCloudSync()}catch(error){setAuthMessage(error.message,"error")}
+  try{const session=await signInCloud(email,password);storeCloudSession(session);setAuthMessage("Akkauntga kirildi. Ma’lumotlar tekshirilmoqda…","success");await initialCloudSync()}catch(error){setAuthMessage(error.message,"error")}
 }
 async function handleSignUp(){
   const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;
   if(!email||password.length<6){setAuthMessage("Email va kamida 6 belgili parol kiriting.","error");return}
   setAuthMessage("Ro‘yxatdan o‘tkazilmoqda…");
-  try{const result=await signUpCloud(email,password);if(result?.access_token){storeCloudSession(result);setAuthMessage("Akkaunt yaratildi va kirildi.","success");await initialCloudSync()}else setAuthMessage("Tasdiqlash xati yuborildi. Emaildagi havolani bosing.","success")}catch(error){setAuthMessage(error.message,"error")}
+  try{const result=await signUpCloud(email,password);if(result?.access_token){storeCloudSession(result);setAuthMessage("Akkaunt yaratildi. Endi xavfsiz birlashtirishni bosing.","success");await initialCloudSync()}else setAuthMessage("Tasdiqlash xati yuborildi. Emaildagi havolani bosing.","success")}catch(error){setAuthMessage(error.message,"error")}
 }
 
 function openPhotoDB(){return new Promise((resolve,reject)=>{if(!("indexedDB" in window)){resolve(null);return}const request=indexedDB.open("fit-jarvis-db",1);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("photos")){const store=db.createObjectStore("photos",{keyPath:"id"});store.createIndex("date","date",{unique:false})}};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
@@ -648,8 +729,8 @@ function csvExport(){
   download(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),"FIT_JARVIS_30_kun.csv");
 }
 function download(blob,name){let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function exportJson(){download(new Blob([JSON.stringify({version:4,cloudSync:true,settings,records,habitData,gymData,measureData,photoData},null,2)],{type:"application/json"}),"FIT_JARVIS_v4_backup.json")}
-function importJson(file){let rd=new FileReader();rd.onload=async()=>{try{let d=JSON.parse(rd.result);settings=d.settings||settings;records=d.records||records;habitData=d.habitData||habitData;gymData=Array.isArray(d.gymData)?d.gymData:gymData;measureData=Array.isArray(d.measureData)?d.measureData:measureData;photoData=Array.isArray(d.photoData)?d.photoData:photoData;await replaceIndexedPhotos(photoData);save();renderAll();alert("Backup yuklandi va sinxronlashga tayyorlandi") }catch(e){alert("JSON fayl noto‘g‘ri")}};rd.readAsText(file)}
+function exportJson(){download(new Blob([JSON.stringify({version:5,cloudSync:true,safeSync:true,settings,records,habitData,gymData,measureData,photoData},null,2)],{type:"application/json"}),"FIT_JARVIS_v5_backup.json")}
+function importJson(file){let rd=new FileReader();rd.onload=async()=>{try{const d=JSON.parse(rd.result);snapshotLocalState("JSON importdan oldingi holat");applyStateObject(d,{render:false,touch:true});await replaceIndexedPhotos(photoData);cloudSyncReady=false;localStorage.removeItem(CLOUD_READY_USER_KEY);renderAll();updateCloudUI();setSyncStatus("Import qilindi — birlashtirish kerak","warn");alert("Backup lokal tiklandi. Endi Akkaunt bo‘limidan Xavfsiz birlashtirishni bosing.") }catch(e){alert("JSON fayl noto‘g‘ri")}};rd.readAsText(file)}
 function loadSettings(){Object.keys(defaultSettings).forEach(k=>document.getElementById(k).value=settings[k])}
 function saveSettings(){Object.keys(defaultSettings).forEach(k=>settings[k]=Number(document.getElementById(k).value));save();renderAll();alert("Sozlamalar saqlandi")}
 
@@ -672,7 +753,7 @@ async function bootstrap(){
 
   document.getElementById("todayDate").onchange=e=>loadToday(e.target.value);
   document.getElementById("saveToday").onclick=saveToday;
-  document.getElementById("saveAll").onclick=()=>{save();renderAll();alert("Barcha ma’lumotlar lokal saqlandi va bulutga yuboriladi")};
+  document.getElementById("saveAll").onclick=()=>{save();renderAll();alert(cloudSyncReady?"Barcha ma’lumotlar lokal saqlandi va xavfsiz sinxronlash rejalashtirildi":"Barcha ma’lumotlar lokal saqlandi. Bulut uchun avval xavfsiz birlashtirishni bosing.")};
   document.getElementById("exportJson").onclick=exportJson;document.getElementById("exportCsv").onclick=csvExport;
   document.getElementById("importJson").onchange=e=>e.target.files[0]&&importJson(e.target.files[0]);
   document.getElementById("saveSettings").onclick=saveSettings;
@@ -687,11 +768,14 @@ async function bootstrap(){
   document.getElementById("authModal").onclick=e=>{if(e.target.id==="authModal")closeAuth()};
   document.getElementById("signInBtn").onclick=handleSignIn;document.getElementById("signUpBtn").onclick=handleSignUp;
   document.getElementById("modalLogoutBtn").onclick=logoutCloud;document.getElementById("logoutCloud").onclick=logoutCloud;
-  document.getElementById("syncNowBtn").onclick=initialCloudSync;
+  document.getElementById("syncNowBtn").onclick=()=>mergeCloudAndLocal({silent:false});
+  document.getElementById("mergeCloud").onclick=()=>mergeCloudAndLocal({silent:false}).catch(e=>alert(e.message));
   document.getElementById("forceDownloadBtn").onclick=()=>downloadStateFromCloud({force:true}).catch(e=>setAuthMessage(e.message,"error"));
   document.getElementById("downloadCloud").onclick=()=>downloadStateFromCloud({force:false}).catch(e=>alert(e.message));
-  document.getElementById("forceUploadBtn").onclick=()=>uploadStateToCloud().then(ok=>ok&&setAuthMessage("Qurilmadagi ma’lumot bulutga yuborildi.","success"));
-  document.getElementById("uploadCloud").onclick=()=>{if(confirm("Ushbu qurilmadagi ma’lumot bulutdagi nusxani yangilaydi. Davom etilsinmi?"))uploadStateToCloud()};
+  document.getElementById("forceUploadBtn").onclick=()=>replaceCloudFromLocal().catch(e=>setAuthMessage(e.message,"error"));
+  document.getElementById("uploadCloud").onclick=()=>replaceCloudFromLocal().catch(e=>alert(e.message));
+  document.getElementById("restoreBackupBtn").onclick=restoreLatestBackup;
+  document.getElementById("restoreBackupSettings").onclick=restoreLatestBackup;
   document.getElementById("authPassword").addEventListener("keydown",e=>{if(e.key==="Enter")handleSignIn()});
 
   renderAll();cloudBooting=false;await initialCloudSync();
