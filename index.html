@@ -600,7 +600,7 @@ function scoreFor(r){
   const waterPct=clamp((Number(r.water)||0)/settings.waterGoal*100);
   const sleepPct=clamp((Number(r.sleep)||0)/settings.sleepGoal*100);
   const p=dayPlan(r.date), activePct=clamp((Number(r.steps)||0)/settings.stepsGoal*100);
-  if(p.type==="Dam olish/ofis" || p.type==="Suzish/yengil") return Math.round(clamp(r.food)*0.45+sleepPct*0.30+waterPct*0.15+activePct*0.10);
+  if(p.type==="Dam / ofis" || p.type==="Suzish/yengil") return Math.round(clamp(r.food)*0.45+sleepPct*0.30+waterPct*0.15+activePct*0.10);
   const sw=Number(settings.sportWeight),fw=Number(settings.foodWeight),slw=Number(settings.sleepWeight),ww=Number(settings.waterWeight),total=sw+fw+slw+ww||100;
   return Math.round((clamp(r.sport)*sw+clamp(r.food)*fw+sleepPct*slw+waterPct*ww)/total);
 }
